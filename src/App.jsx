@@ -165,7 +165,12 @@ const sliderMarks = [
 
 const defGridSize = 20;
 function App() {
-  const [gridSize, setGridSize] = useState(defGridSize);
+  const [gridSize, setGridSize] = useState(
+    parseInt(localStorage.getItem("gridSize")) || defGridSize
+  );
+  useEffect(() => {
+    localStorage.setItem("gridSize", gridSize);
+  }, [gridSize]);
   const [grid, setGrid] = useState([]); // Initialize as an empty grid
 
   return (
@@ -183,7 +188,7 @@ function App() {
           </Typography>
           <Slider
             valueLabelDisplay="auto"
-            defaultValue={defGridSize}
+            defaultValue={gridSize}
             step={10}
             min={20}
             max={100}
