@@ -2,6 +2,8 @@ import {
   Box,
   Button,
   Divider,
+  Option,
+  Select,
   Sheet,
   Slider,
   Stack,
@@ -10,7 +12,7 @@ import {
   Typography,
   useColorScheme,
 } from "@mui/joy";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   FaBorderAll,
   FaEraser,
@@ -41,7 +43,6 @@ function ModeToggle() {
     >
       <Button
         variant="plain"
-        size="lg"
         color="neutral"
         onClick={() => {
           setMode(mode === "light" ? "dark" : "light");
@@ -88,8 +89,34 @@ function App() {
   const [grid, setGrid] = useState([]); // Initialize as an empty grid
   // Initialize start/end nodes
   const [startNode, setStartNode] = useState(new Node(3, 3, "start"));
-  const [endNode, setEndNode] = useState(new Node(16, 16, "end"));
+  const [endNode, setEndNode] = useState(new Node(14, 16, "end"));
   const [isErasing, setIsErasing] = useState(false);
+  const handleKeyDown = useCallback(
+    (e) => {
+      if (e.key === "Shift") {
+        setIsErasing(true);
+      }
+    },
+    [setIsErasing]
+  );
+
+  const handleKeyUp = useCallback(
+    (e) => {
+      if (e.key === "Shift") {
+        setIsErasing(false);
+      }
+    },
+    [setIsErasing]
+  );
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keyup", handleKeyUp);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("keyup", handleKeyUp);
+    };
+  }, [handleKeyDown, handleKeyUp]);
 
   return (
     <>
@@ -101,10 +128,7 @@ function App() {
         sx={{ width: "100vw", px: 2, py: 2.5 }}
       >
         <Box sx={{ width: 250 }}>
-          <Typography
-            startDecorator={<FaBorderAll />}
-            sx={{ textAlign: "center" }}
-          >
+          <Typography startDecorator={<FaBorderAll />}>
             Grid Size [{gridSize}x{gridSize}]
           </Typography>
           <Slider
@@ -126,7 +150,6 @@ function App() {
           spacing={2}
         >
           <Button
-            startDecorator={<FaEraser />}
             variant="plain"
             color="danger"
             onClick={() =>
@@ -143,19 +166,32 @@ function App() {
               })
             }
           >
-            Clear Obstacles
+            Clear All Obstacles
           </Button>
-          <Switch
-            variant="solid"
-            startDecorator={<FaPencilAlt />}
-            endDecorator={<FaEraser />}
-            value={isErasing}
-            onChange={() => setIsErasing((prev) => !prev)}
-          />
+          <Tooltip title="Tip: Hold Shift to erase quickly">
+            <Switch
+              variant="solid"
+              startDecorator={<FaPencilAlt />}
+              endDecorator={<FaEraser />}
+              onChange={() => setIsErasing((prev) => !prev)}
+              checked={isErasing}
+            />
+          </Tooltip>
+        </Stack>
+        <Divider orientation="vertical" />
+        <Stack direction="column" gap={1}>
+          <Select defaultValue="dijkstra">
+            <Option value="dijkstra">Dijkstra</Option>
+            <Option value="aStar">A*</Option>
+          </Select>
+          <Button variant="plain" color="primary" size="sm">
+            Visualize
+          </Button>
         </Stack>
         <Divider orientation="vertical" />
         <ModeToggle />
       </Stack>
+
       <Sheet
         sx={{
           display: "grid",
@@ -166,7 +202,7 @@ function App() {
           gridSize={gridSize}
           grid={grid}
           setGrid={setGrid}
-          width={parent.innerHeight - 120}
+          width={parent.innerWidth}
           height={parent.innerHeight - 120}
           theme={useColorScheme().mode}
           startNode={startNode}
