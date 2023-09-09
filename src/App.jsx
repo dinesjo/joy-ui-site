@@ -7,8 +7,8 @@ import {
   Typography,
   useColorScheme,
 } from "@mui/joy";
-import * as React from "react";
 import { useEffect, useRef, useState } from "react";
+import { FaMoon, FaSun } from "react-icons/fa";
 
 const colorMap = {
   light: {
@@ -22,34 +22,53 @@ const colorMap = {
 };
 
 export const Canvas = (props) => {
-  const { gridSize, obstacles, setObstacles, theme } = props;
+  const { gridSize, grid, setGrid, theme } = props;
   const canvasRef = useRef(null); // Reference to the canvas element
 
+  // Initialize the grid
+  useEffect(() => {
+    const grid = [];
+    for (let row = 0; row < gridSize; row++) {
+      const currentRow = [];
+      for (let col = 0; col < gridSize; col++) {
+        currentRow.push({
+          x: col,
+          y: row,
+          isObstacle: false,
+          animationFrame: 0,
+        });
+      }
+      grid.push(currentRow);
+    }
+    setGrid(grid);
+  }, [gridSize]);
+
+  // Draw the grid and obstacles
   useEffect(() => {
     // Get the canvas context
     const canvas = canvasRef.current;
-    const context = canvas.getContext("2d");
+    const context = canvasRef.current.getContext("2d");
 
     // Clear the canvas
     context.clearRect(0, 0, context.canvas.width, context.canvas.height);
 
-    // Draw grid and obstacles
+    // Set the grid color
     context.strokeStyle = colorMap[theme].grid;
-    for (let row = 0; row < gridSize; row++) {
-      for (let col = 0; col < gridSize; col++) {
-        const cellSize = canvas.width / gridSize;
-        const x = col * cellSize;
-        const y = row * cellSize;
-        context.strokeRect(x, y, cellSize, cellSize);
 
-        if (
-          obstacles.some((obstacle) => obstacle.x === col && obstacle.y === row)
-        ) {
+    // Draw grid from the grid state
+    grid.forEach((row) => {
+      row.forEach((cell) => {
+        const cellSize = context.canvas.width / gridSize;
+        const x = cell.x * cellSize;
+        const y = cell.y * cellSize;
+        context.strokeRect(x, y, cellSize, cellSize);
+        if (cell.isObstacle) {
           context.fillStyle = colorMap[theme].obstacle;
           context.fillRect(x, y, cellSize, cellSize);
         }
-      }
-    }
+      });
+    });
+
     // Draw obstacles
     canvas.addEventListener("mousedown", handleMouseDown);
     canvas.addEventListener("mousemove", handleMouseMove);
@@ -61,20 +80,23 @@ export const Canvas = (props) => {
       canvas.removeEventListener("mousemove", handleMouseMove);
       canvas.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [gridSize, obstacles, theme]); // Re-render canvas upon changes
+  }, [grid, theme]); // Re-render canvas upon changes
 
   const handleMouseDown = (e) => {
     const canvas = canvasRef.current;
     // Calculate the cell coordinates where the user clicked
     const cellSize = canvas.width / gridSize;
-    const col = Math.floor(e.offsetX / cellSize);
     const row = Math.floor(e.offsetY / cellSize);
+    const col = Math.floor(e.offsetX / cellSize);
 
     // Check if the cell is not already an obstacle
-    if (
-      !obstacles.some((obstacle) => obstacle.x === col && obstacle.y === row)
-    ) {
-      setObstacles([...obstacles, { x: col, y: row }]);
+    const cell = grid[row][col];
+    if (!cell.isObstacle) {
+      setGrid((prevGrid) => {
+        const newGrid = [...prevGrid];
+        newGrid[row][col] = { ...cell, isObstacle: true };
+        return newGrid;
+      });
     }
   };
 
@@ -94,11 +116,11 @@ export const Canvas = (props) => {
 
 function ModeToggle() {
   const { mode, setMode } = useColorScheme();
-  const [mounted, setMounted] = React.useState(false);
+  const [mounted, setMounted] = useState(false);
 
   // necessary for server-side rendering
   // because mode is undefined on the server
-  React.useEffect(() => {
+  useEffect(() => {
     setMounted(true);
   }, []);
   if (!mounted) {
@@ -108,16 +130,17 @@ function ModeToggle() {
   return (
     <Button
       variant="soft"
+      color="neutral"
       onClick={() => {
         setMode(mode === "light" ? "dark" : "light");
       }}
     >
-      {mode === "light" ? "Turn dark" : "Turn light"}
+      {mode === "light" ? <FaMoon /> : <FaSun />}
     </Button>
   );
 }
 
-const marks = [
+const sliderMarks = [
   {
     value: 20,
     label: "20",
@@ -142,8 +165,8 @@ const marks = [
 
 const defGridSize = 20;
 function App() {
-  const [gridSize, setGridSize] = React.useState(defGridSize);
-  const [obstacles, setObstacles] = useState([]);
+  const [gridSize, setGridSize] = useState(defGridSize);
+  const [grid, setGrid] = useState([]); // Initialize as an empty grid
 
   return (
     <>
@@ -164,13 +187,30 @@ function App() {
             step={10}
             min={20}
             max={100}
-            marks={marks}
+            marks={sliderMarks}
             sx={{ mx: 4 }}
             onChange={(e, v) => {
               setGridSize(v);
             }}
           />
         </Box>
+        <Button
+          variant="soft"
+          color="danger"
+          onClick={() =>
+            setGrid((prevGrid) => {
+              const newGrid = [...prevGrid];
+              newGrid.forEach((row) => {
+                row.forEach((cell) => {
+                  cell.isObstacle = false;
+                });
+              });
+              return newGrid;
+            })
+          }
+        >
+          Clear Obstacles
+        </Button>
         <ModeToggle />
       </Stack>
       <Sheet
@@ -181,8 +221,8 @@ function App() {
       >
         <Canvas
           gridSize={gridSize}
-          obstacles={obstacles}
-          setObstacles={setObstacles}
+          grid={grid}
+          setGrid={setGrid}
           width={parent.innerWidth}
           height={parent.innerHeight - 120}
           theme={useColorScheme().mode}
