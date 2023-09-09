@@ -1,14 +1,23 @@
 import {
   Box,
   Button,
+  Divider,
   Sheet,
   Slider,
   Stack,
+  Switch,
+  Tooltip,
   Typography,
   useColorScheme,
 } from "@mui/joy";
 import { useEffect, useState } from "react";
-import { FaBorderAll, FaMoon, FaSun } from "react-icons/fa";
+import {
+  FaBorderAll,
+  FaEraser,
+  FaMoon,
+  FaPencilAlt,
+  FaSun,
+} from "react-icons/fa";
 import Node from "./Node";
 import Canvas from "./Canvas";
 
@@ -26,15 +35,21 @@ function ModeToggle() {
   }
 
   return (
-    <Button
+    <Tooltip
+      title={mode === "light" ? "Dark Mode" : "Light Mode"}
       variant="soft"
-      color="neutral"
-      onClick={() => {
-        setMode(mode === "light" ? "dark" : "light");
-      }}
     >
-      {mode === "light" ? <FaMoon /> : <FaSun />}
-    </Button>
+      <Button
+        variant="plain"
+        size="lg"
+        color="neutral"
+        onClick={() => {
+          setMode(mode === "light" ? "dark" : "light");
+        }}
+      >
+        {mode === "light" ? <FaMoon /> : <FaSun />}
+      </Button>
+    </Tooltip>
   );
 }
 
@@ -74,6 +89,7 @@ function App() {
   // Initialize start/end nodes
   const [startNode, setStartNode] = useState(new Node(3, 3, "start"));
   const [endNode, setEndNode] = useState(new Node(16, 16, "end"));
+  const [isErasing, setIsErasing] = useState(false);
 
   return (
     <>
@@ -103,25 +119,41 @@ function App() {
             }}
           />
         </Box>
-        <Button
-          variant="soft"
-          color="danger"
-          onClick={() =>
-            setGrid((prevGrid) => {
-              const newGrid = [...prevGrid];
-              newGrid.forEach((row) => {
-                row.forEach((node) => {
-                  if (node.type === "obstacle") {
-                    node.type = "empty";
-                  }
-                });
-              });
-              return newGrid;
-            })
-          }
+        <Stack
+          direction="column"
+          justifyContent="center"
+          alignItems="center"
+          spacing={2}
         >
-          Clear Obstacles
-        </Button>
+          <Button
+            startDecorator={<FaEraser />}
+            variant="plain"
+            color="danger"
+            onClick={() =>
+              setGrid((prevGrid) => {
+                const newGrid = [...prevGrid];
+                newGrid.forEach((row) => {
+                  row.forEach((node) => {
+                    if (node.type === "obstacle") {
+                      node.type = "empty";
+                    }
+                  });
+                });
+                return newGrid;
+              })
+            }
+          >
+            Clear Obstacles
+          </Button>
+          <Switch
+            variant="solid"
+            startDecorator={<FaPencilAlt />}
+            endDecorator={<FaEraser />}
+            value={isErasing}
+            onChange={() => setIsErasing((prev) => !prev)}
+          />
+        </Stack>
+        <Divider orientation="vertical" />
         <ModeToggle />
       </Stack>
       <Sheet
@@ -141,6 +173,7 @@ function App() {
           setStartNode={setStartNode}
           endNode={endNode}
           setEndNode={setEndNode}
+          isErasing={isErasing}
         />
       </Sheet>
     </>

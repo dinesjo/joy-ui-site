@@ -9,9 +9,9 @@ const colorMap = {
     end: "#A51818",
   },
   dark: {
-    obstacle: "#e0e0e0",
+    obstacle: "#888",
     grid: "#333",
-    start: "#12467B",
+    start: "#2255AB",
     end: "#A51818",
   },
 };
@@ -110,11 +110,11 @@ const Canvas = (props) => {
     } else if (node.type === "end") {
       setIsDraggingEndNode(true);
       setEndNode(new Node(row, col, "end"));
-    } else if (node.type === "empty") {
+    } else {
       // Handle drawing obstacles logic here
       setGrid((prevGrid) => {
         const newGrid = [...prevGrid];
-        newGrid[row][col] = { ...node, type: "obstacle" };
+        newGrid[row][col] = { ...node, type: props.isErasing ? "empty" : "obstacle" };
         return newGrid;
       });
     }
