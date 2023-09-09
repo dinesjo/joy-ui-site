@@ -7,137 +7,10 @@ import {
   Typography,
   useColorScheme,
 } from "@mui/joy";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { FaBorderAll, FaMoon, FaSun } from "react-icons/fa";
 import Node from "./Node";
-
-const colorMap = {
-  light: {
-    obstacle: "#222",
-    grid: "#e0e0e0",
-    start: "#12467B",
-    end: "#A51818",
-  },
-  dark: {
-    obstacle: "#e0e0e0",
-    grid: "#333",
-    start: "#12467B",
-    end: "#A51818",
-  },
-};
-
-export const Canvas = (props) => {
-  const {
-    gridSize,
-    grid,
-    setGrid,
-    theme,
-    startNode,
-    setStartNode,
-    endNode,
-    setEndNode,
-  } = props;
-  const canvasRef = useRef(null); // Reference to the canvas element
-  // const [draggingNode, setDraggingNode] = useState(); // Whether the user is dragging the start/end node
-
-  // Initialize the grid
-  useEffect(() => {
-    const grid = [];
-    for (let row = 0; row < gridSize; row++) {
-      const currentRow = [];
-      for (let col = 0; col < gridSize; col++) {
-        currentRow.push(new Node(col, row));
-      }
-      grid.push(currentRow);
-    }
-    // Add the start and end nodes
-    grid[startNode.row][startNode.col].type = "start";
-    grid[endNode.row][endNode.col].type = "end";
-
-    setGrid(grid);
-  }, [gridSize]);
-
-  // Draw the grid and obstacles
-  useEffect(() => {
-    // Get the canvas context
-    const canvas = canvasRef.current;
-    const context = canvasRef.current.getContext("2d");
-    const cellSize = context.canvas.width / gridSize;
-
-    // Clear the canvas
-    context.clearRect(0, 0, context.canvas.width, context.canvas.height);
-
-    // Set the grid color
-    context.strokeStyle = colorMap[theme].grid;
-
-    // Draw grid from the grid state
-    grid.forEach((row) => {
-      row.forEach((cell) => {
-        const x = cell.col * cellSize;
-        const y = cell.row * cellSize;
-        context.strokeRect(x, y, cellSize, cellSize); // Draw the cell
-        if (cell.type === "obstacle") {
-          // Draw the obstacle
-          context.fillStyle = colorMap[theme].obstacle;
-          context.fillRect(x, y, cellSize, cellSize);
-        }
-        if (cell.type === "start") {
-          // Draw the start node
-          context.fillStyle = colorMap[theme].start;
-          context.fillRect(x, y, cellSize, cellSize);
-        }
-        if (cell.type === "end") {
-          // Draw the end node
-          context.fillStyle = colorMap[theme].end;
-          context.fillRect(x, y, cellSize, cellSize);
-        }
-      });
-    });
-
-    // Draw obstacles
-    canvas.addEventListener("mousedown", handleMouseDown);
-    canvas.addEventListener("mousemove", handleMouseMove);
-    canvas.addEventListener("mouseup", handleMouseUp);
-
-    return () => {
-      // Remove event listeners on cleanup
-      canvas.removeEventListener("mousedown", handleMouseDown);
-      canvas.removeEventListener("mousemove", handleMouseMove);
-      canvas.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [grid, theme]); // Re-render canvas upon changes
-
-  const handleMouseDown = (e) => {
-    const canvas = canvasRef.current;
-    const cellSize = canvas.width / gridSize;
-    // Calculate the cell coordinates where the user clicked
-    const row = Math.floor(e.offsetY / cellSize);
-    const col = Math.floor(e.offsetX / cellSize);
-
-    // Check if the cell is empty
-    const cell = grid[row][col];
-    if (cell.type === "empty") {
-      setGrid((prevGrid) => {
-        const newGrid = [...prevGrid];
-        newGrid[row][col] = { ...cell, type: "obstacle" };
-        return newGrid;
-      });
-    }
-  };
-
-  const handleMouseMove = (e) => {
-    // If the mouse button is pressed, draw obstacles while moving
-    if (e.buttons === 1) {
-      handleMouseDown(e);
-    }
-  };
-
-  const handleMouseUp = () => {
-    // Do any cleanup if needed
-  };
-
-  return <canvas ref={canvasRef} width={props.width} height={props.height} />;
-};
+import Canvas from "./Canvas";
 
 function ModeToggle() {
   const { mode, setMode } = useColorScheme();
@@ -188,11 +61,10 @@ const sliderMarks = [
   },
 ];
 
-const defGridSize = 20;
 function App() {
   // Initialize the grid size from local storage
   const [gridSize, setGridSize] = useState(
-    parseInt(localStorage.getItem("gridSize")) || defGridSize
+    parseInt(localStorage.getItem("gridSize")) || 20
   );
   useEffect(() => {
     localStorage.setItem("gridSize", gridSize);
@@ -200,8 +72,8 @@ function App() {
   // Initialize the grid
   const [grid, setGrid] = useState([]); // Initialize as an empty grid
   // Initialize start/end nodes
-  const [startNode, setStartNode] = useState(new Node(0, 0, "start"));
-  const [endNode, setEndNode] = useState(new Node(10, 10, "end"));
+  const [startNode, setStartNode] = useState(new Node(3, 3, "start"));
+  const [endNode, setEndNode] = useState(new Node(16, 16, "end"));
 
   return (
     <>
@@ -238,9 +110,9 @@ function App() {
             setGrid((prevGrid) => {
               const newGrid = [...prevGrid];
               newGrid.forEach((row) => {
-                row.forEach((cell) => {
-                  if (cell.type === "obstacle") {
-                    cell.type = "empty";
+                row.forEach((node) => {
+                  if (node.type === "obstacle") {
+                    node.type = "empty";
                   }
                 });
               });
@@ -262,7 +134,7 @@ function App() {
           gridSize={gridSize}
           grid={grid}
           setGrid={setGrid}
-          width={parent.innerWidth}
+          width={parent.innerHeight - 120}
           height={parent.innerHeight - 120}
           theme={useColorScheme().mode}
           startNode={startNode}
