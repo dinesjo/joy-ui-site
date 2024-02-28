@@ -19,6 +19,7 @@ const colorMap = {
 
 export default function Canvas(props) {
   const { gridSize, grid, setGrid, theme, startNode, setStartNode, endNode, setEndNode } = props;
+  const cellSize = props.sideLength / gridSize;
   const canvasRef = useRef(null); // Reference to the canvas element
   const [isDraggingStartNode, setIsDraggingStartNode] = useState(false);
   const [isDraggingEndNode, setIsDraggingEndNode] = useState(false);
@@ -46,7 +47,6 @@ export default function Canvas(props) {
     // Get the canvas context
     const canvas = canvasRef.current;
     const context = canvasRef.current.getContext("2d");
-    const cellSize = props.sideLength / gridSize;
 
     // Clear the canvas
     context.clearRect(0, 0, context.canvas.width, props.sideLength);
@@ -93,7 +93,6 @@ export default function Canvas(props) {
   function handleMouseDown(e) {
     if (grid.length === 0) return;
 
-    const cellSize = props.sideLength / gridSize;
     const row = Math.floor(e.offsetY / cellSize);
     const col = Math.floor(e.offsetX / cellSize);
     const node = grid[row][col];
@@ -117,7 +116,6 @@ export default function Canvas(props) {
   function handleMouseMove(e) {
     if (grid.length === 0) return;
 
-    const cellSize = props.sideLength / gridSize;
     const row = Math.floor(e.offsetY / cellSize);
     const col = Math.floor(e.offsetX / cellSize);
     const node = grid[row][col];
@@ -132,14 +130,8 @@ export default function Canvas(props) {
   }
 
   function handleMouseUp() {
-    // Handle the end of node dragging here
-    if (isDraggingStartNode) {
-      setIsDraggingStartNode(false);
-      // Additional logic for handling the end of start node dragging
-    } else if (isDraggingEndNode) {
-      setIsDraggingEndNode(false);
-      // Additional logic for handling the end of end node dragging
-    }
+    setIsDraggingStartNode(false);
+    setIsDraggingEndNode(false);
   }
 
   return <canvas ref={canvasRef} width={props.sideLength} height={props.sideLength} />;
