@@ -13,13 +13,7 @@ import {
   useColorScheme,
 } from "@mui/joy";
 import { useCallback, useEffect, useState } from "react";
-import {
-  FaBorderAll,
-  FaEraser,
-  FaMoon,
-  FaPencilAlt,
-  FaSun,
-} from "react-icons/fa";
+import { FaBorderAll, FaEraser, FaMoon, FaPencilAlt, FaSun } from "react-icons/fa";
 import Node from "./Node";
 import Canvas from "./Canvas";
 
@@ -37,10 +31,7 @@ function ModeToggle() {
   }
 
   return (
-    <Tooltip
-      title={mode === "light" ? "Dark Mode" : "Light Mode"}
-      variant="soft"
-    >
+    <Tooltip title={mode === "light" ? "Dark Mode" : "Light Mode"} variant="soft">
       <Button
         variant="plain"
         color="neutral"
@@ -79,18 +70,19 @@ const sliderMarks = [
 
 function App() {
   // Initialize the grid size from local storage
-  const [gridSize, setGridSize] = useState(
-    parseInt(localStorage.getItem("gridSize")) || 20
-  );
+  const [gridSize, setGridSize] = useState(parseInt(localStorage.getItem("gridSize")) || 20);
   useEffect(() => {
     localStorage.setItem("gridSize", gridSize);
   }, [gridSize]);
+
   // Initialize the grid
   const [grid, setGrid] = useState([]); // Initialize as an empty grid
+
   // Initialize start/end nodes
   const [startNode, setStartNode] = useState(new Node(3, 3, "start"));
   const [endNode, setEndNode] = useState(new Node(14, 16, "end"));
   const [isErasing, setIsErasing] = useState(false);
+
   const handleKeyDown = useCallback(
     (e) => {
       if (e.key === "Shift") {
@@ -133,22 +125,18 @@ function App() {
           </Typography>
           <Slider
             valueLabelDisplay="auto"
-            defaultValue={gridSize}
+            defaultValue={20}
+            value={gridSize}
             step={10}
             min={20}
             max={100}
             marks={sliderMarks}
-            onChange={(e, v) => {
+            onChange={(_, v) => {
               setGridSize(v);
             }}
           />
         </Box>
-        <Stack
-          direction="column"
-          justifyContent="center"
-          alignItems="center"
-          spacing={2}
-        >
+        <Stack direction="column" justifyContent="center" alignItems="center" spacing={2}>
           <Button
             variant="plain"
             color="danger"

@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useEffect, useState, useRef } from "react";
 import Node from "./Node";
 
@@ -16,23 +17,14 @@ const colorMap = {
   },
 };
 
-const Canvas = (props) => {
-  const {
-    gridSize,
-    grid,
-    setGrid,
-    theme,
-    startNode,
-    setStartNode,
-    endNode,
-    setEndNode,
-  } = props;
+function Canvas(props) {
+  const { gridSize, grid, setGrid, theme, startNode, setStartNode, endNode, setEndNode } = props;
   const canvasRef = useRef(null); // Reference to the canvas element
   const [isDraggingStartNode, setIsDraggingStartNode] = useState(false);
   const [isDraggingEndNode, setIsDraggingEndNode] = useState(false);
 
-  // Initialize the grid
-  useEffect(() => {
+  // Clear the grid and set the start and end nodes
+  function clearWalls() {
     const grid = [];
     for (let row = 0; row < gridSize; row++) {
       const currentRow = [];
@@ -46,7 +38,8 @@ const Canvas = (props) => {
     grid[endNode.row][endNode.col].type = "end";
 
     setGrid(grid);
-  }, [gridSize]);
+  }
+  useEffect(clearWalls, [gridSize]);
 
   // Draw the grid and obstacles
   useEffect(() => {
@@ -85,7 +78,6 @@ const Canvas = (props) => {
       });
     });
 
-    // Draw obstacles
     canvas.addEventListener("mousedown", handleMouseDown);
     canvas.addEventListener("mousemove", handleMouseMove);
     canvas.addEventListener("mouseup", handleMouseUp);
@@ -98,7 +90,9 @@ const Canvas = (props) => {
     };
   }, [grid, theme]); // Re-render canvas upon changes
 
-  const handleMouseDown = (e) => {
+  function handleMouseDown(e) {
+    if (grid.length === 0) return;
+
     const cellSize = canvasRef.current.width / gridSize;
     const row = Math.floor(e.offsetY / cellSize);
     const col = Math.floor(e.offsetX / cellSize);
@@ -118,9 +112,11 @@ const Canvas = (props) => {
         return newGrid;
       });
     }
-  };
+  }
 
-  const handleMouseMove = (e) => {
+  function handleMouseMove(e) {
+    if (grid.length === 0) return;
+
     const cellSize = canvasRef.current.width / gridSize;
     const row = Math.floor(e.offsetY / cellSize);
     const col = Math.floor(e.offsetX / cellSize);
@@ -154,9 +150,9 @@ const Canvas = (props) => {
     } else if (e.buttons === 1) {
       handleMouseDown(e);
     }
-  };
+  }
 
-  const handleMouseUp = () => {
+  function handleMouseUp() {
     // Handle the end of node dragging here
     if (isDraggingStartNode) {
       setIsDraggingStartNode(false);
@@ -165,9 +161,9 @@ const Canvas = (props) => {
       setIsDraggingEndNode(false);
       // Additional logic for handling the end of end node dragging
     }
-  };
+  }
 
   return <canvas ref={canvasRef} width={props.width} height={props.height} />;
-};
+}
 
 export default Canvas;
