@@ -77,11 +77,30 @@ function App() {
 
   // Initialize the grid
   const [grid, setGrid] = useState([]); // Initialize as an empty grid
+  const [isErasing, setIsErasing] = useState(false);
 
   // Initialize start/end nodes
   const [startNode, setStartNode] = useState(new Node(3, 3, "start"));
   const [endNode, setEndNode] = useState(new Node(14, 16, "end"));
-  const [isErasing, setIsErasing] = useState(false);
+  // When changing start/end nodes, remove the previous start/end nodes from grid
+  useEffect(() => {
+    setGrid((prevGrid) => {
+      // Ensure the only node.type=start/end-nodes are the ones in startNode/endNode
+      const newGrid = [...prevGrid];
+      newGrid.forEach((row) => {
+        row.forEach((node) => {
+          if (node.type === "start") {
+            node.type = "empty";
+          } else if (node.type === "end") {
+            node.type = "empty";
+          }
+        });
+      });
+      newGrid[startNode.row][startNode.col].type = "start";
+      newGrid[endNode.row][endNode.col].type = "end";
+      return newGrid;
+    });
+  }, [startNode, endNode]);
 
   const handleKeyDown = useCallback(
     (e) => {

@@ -17,7 +17,7 @@ const colorMap = {
   },
 };
 
-function Canvas(props) {
+export default function Canvas(props) {
   const { gridSize, grid, setGrid, theme, startNode, setStartNode, endNode, setEndNode } = props;
   const canvasRef = useRef(null); // Reference to the canvas element
   const [isDraggingStartNode, setIsDraggingStartNode] = useState(false);
@@ -121,32 +121,13 @@ function Canvas(props) {
     const row = Math.floor(e.offsetY / cellSize);
     const col = Math.floor(e.offsetX / cellSize);
     const node = grid[row][col];
-    if (isDraggingStartNode || isDraggingEndNode) {
-      // Handle node dragging logic here
-      setGrid((prevGrid) => {
-        const newGrid = [...prevGrid];
-        if (isDraggingStartNode) {
-          // Prevent the start node from being dragged onto the end node
-          if (row === endNode.row && col === endNode.col) {
-            return newGrid;
-          }
-          newGrid[startNode.row][startNode.col] = {
-            ...startNode,
-            type: "empty",
-          };
-          newGrid[row][col] = { ...node, type: "start" };
-          setStartNode(new Node(row, col, "start"));
-        } else if (isDraggingEndNode) {
-          // Prevent the end node from being dragged onto the start node
-          if (row === startNode.row && col === startNode.col) {
-            return newGrid;
-          }
-          newGrid[endNode.row][endNode.col] = { ...endNode, type: "empty" };
-          newGrid[row][col] = { ...node, type: "end" };
-          setEndNode(new Node(row, col, "end"));
-        }
-        return newGrid;
-      });
+
+    if (isDraggingStartNode) {
+      if (node.type !== "empty") return; // Don't override obstacles
+      setStartNode(new Node(row, col, "start"));
+    } else if (isDraggingEndNode) {
+      if (node.type !== "empty") return; // Don't override obstacles
+      setEndNode(new Node(row, col, "end"));
     } else if (e.buttons === 1) {
       handleMouseDown(e);
     }
@@ -165,5 +146,3 @@ function Canvas(props) {
 
   return <canvas ref={canvasRef} width={props.width} height={props.height} />;
 }
-
-export default Canvas;
