@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useEffect, useState, useRef } from "react";
-import Node from "./Node";
+import { Node, NODE_TYPES } from "./Node";
 
 const colorMap = {
   light: {
@@ -25,10 +25,10 @@ export default function Canvas(props) {
   const [isDraggingEndNode, setIsDraggingEndNode] = useState(false);
 
   // Clear the grid and set the start and end nodes
-  function clearWalls() {
-    const grid = [];
+  useEffect(() => {
+    let grid = [];
     for (let row = 0; row < gridSize; row++) {
-      const currentRow = [];
+      let currentRow = [];
       for (let col = 0; col < gridSize; col++) {
         currentRow.push(new Node(row, col));
       }
@@ -39,8 +39,7 @@ export default function Canvas(props) {
     grid[endNode.row][endNode.col].type = "end";
 
     setGrid(grid);
-  }
-  useEffect(clearWalls, [gridSize]);
+  }, [gridSize]);
 
   // Draw the grid and obstacles
   useEffect(() => {
@@ -60,7 +59,7 @@ export default function Canvas(props) {
         const x = node.col * cellSize;
         const y = node.row * cellSize;
         context.strokeRect(x, y, cellSize, cellSize);
-        if (node.type === "obstacle") {
+        if (node.type === NODE_TYPES.OBSTACLE) {
           // Draw the obstacle
           context.fillStyle = colorMap[theme].obstacle;
           context.fillRect(x, y, cellSize, cellSize);
@@ -88,7 +87,7 @@ export default function Canvas(props) {
       canvas.removeEventListener("mousemove", handleMouseMove);
       canvas.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [grid, theme]); // Re-render canvas upon changes
+  }, [cellSize, grid, handleMouseDown, handleMouseMove, props.sideLength, theme]); // Re-render canvas upon changes
 
   function handleMouseDown(e) {
     if (grid.length === 0) return;
@@ -107,7 +106,7 @@ export default function Canvas(props) {
       // Handle drawing obstacles logic here
       setGrid((prevGrid) => {
         const newGrid = [...prevGrid];
-        newGrid[row][col] = { ...node, type: props.isErasing ? "empty" : "obstacle" };
+        newGrid[row][col] = { ...node, type: props.isErasing ? "empty" : NODE_TYPES.OBSTACLE };
         return newGrid;
       });
     }

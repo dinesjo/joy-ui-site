@@ -14,7 +14,7 @@ import {
 } from "@mui/joy";
 import { useCallback, useEffect, useState } from "react";
 import { FaBorderAll, FaEraser, FaMoon, FaPencilAlt, FaSun } from "react-icons/fa";
-import Node from "./Node";
+import { Node, NODE_TYPES } from "./Node";
 import Canvas from "./Canvas";
 
 function ModeToggle() {
@@ -68,7 +68,7 @@ const sliderMarks = [
   },
 ];
 
-function App() {
+export default function App() {
   // Initialize the grid size from local storage
   const [gridSize, setGridSize] = useState(parseInt(localStorage.getItem("gridSize")) || 30);
   useEffect(() => {
@@ -171,7 +171,7 @@ function App() {
                 const newGrid = [...prevGrid];
                 newGrid.forEach((row) => {
                   row.forEach((node) => {
-                    if (node.type === "obstacle") {
+                    if (node.type === NODE_TYPES.OBSTACLE) {
                       node.type = "empty";
                     }
                   });
@@ -228,5 +228,3 @@ function App() {
     </>
   );
 }
-
-export default App;
