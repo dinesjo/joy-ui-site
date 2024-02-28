@@ -70,18 +70,16 @@ const sliderMarks = [
 
 function App() {
   // Initialize the grid size from local storage
-  const [gridSize, setGridSize] = useState(parseInt(localStorage.getItem("gridSize")) || 20);
+  const [gridSize, setGridSize] = useState(parseInt(localStorage.getItem("gridSize")) || 30);
   useEffect(() => {
     localStorage.setItem("gridSize", gridSize);
   }, [gridSize]);
 
-  // Initialize the grid
-  const [grid, setGrid] = useState([]); // Initialize as an empty grid
   const [isErasing, setIsErasing] = useState(false);
+  const [grid, setGrid] = useState([]); // Initialize as an empty grid
 
-  // Initialize start/end nodes
-  const [startNode, setStartNode] = useState(new Node(3, 3, "start"));
-  const [endNode, setEndNode] = useState(new Node(14, 16, "end"));
+  const [startNode, setStartNode] = useState(JSON.parse(localStorage.getItem("startNode")) || new Node(2, 2, "start"));
+  const [endNode, setEndNode] = useState(JSON.parse(localStorage.getItem("endNode")) || new Node(7, 10, "end"));
   // When changing start/end nodes, remove the previous start/end nodes from grid
   useEffect(() => {
     setGrid((prevGrid) => {
@@ -100,6 +98,10 @@ function App() {
       newGrid[endNode.row][endNode.col].type = "end";
       return newGrid;
     });
+
+    // Update in local storage
+    localStorage.setItem("startNode", JSON.stringify(startNode));
+    localStorage.setItem("endNode", JSON.stringify(endNode));
   }, [startNode, endNode]);
 
   const handleKeyDown = useCallback(
@@ -151,7 +153,12 @@ function App() {
             max={100}
             marks={sliderMarks}
             onChange={(_, v) => {
-              setGridSize(v);
+              // Don't allow grid size to exceed start/end node positions
+              const max = Math.max(startNode.row, startNode.col, endNode.row, endNode.col);
+              if (v > max) {
+                // TODO: display error message to user
+                setGridSize(v);
+              }
             }}
           />
         </Box>
@@ -209,8 +216,7 @@ function App() {
           gridSize={gridSize}
           grid={grid}
           setGrid={setGrid}
-          width={parent.innerWidth}
-          height={parent.innerHeight - 120}
+          sideLength={parent.innerHeight - 120} // navbar height
           theme={useColorScheme().mode}
           startNode={startNode}
           setStartNode={setStartNode}

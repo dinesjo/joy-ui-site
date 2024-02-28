@@ -46,10 +46,10 @@ export default function Canvas(props) {
     // Get the canvas context
     const canvas = canvasRef.current;
     const context = canvasRef.current.getContext("2d");
-    const cellSize = context.canvas.width / gridSize;
+    const cellSize = props.sideLength / gridSize;
 
     // Clear the canvas
-    context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+    context.clearRect(0, 0, context.canvas.width, props.sideLength);
 
     // Set the grid color
     context.strokeStyle = colorMap[theme].grid;
@@ -93,7 +93,7 @@ export default function Canvas(props) {
   function handleMouseDown(e) {
     if (grid.length === 0) return;
 
-    const cellSize = canvasRef.current.width / gridSize;
+    const cellSize = props.sideLength / gridSize;
     const row = Math.floor(e.offsetY / cellSize);
     const col = Math.floor(e.offsetX / cellSize);
     const node = grid[row][col];
@@ -117,16 +117,14 @@ export default function Canvas(props) {
   function handleMouseMove(e) {
     if (grid.length === 0) return;
 
-    const cellSize = canvasRef.current.width / gridSize;
+    const cellSize = props.sideLength / gridSize;
     const row = Math.floor(e.offsetY / cellSize);
     const col = Math.floor(e.offsetX / cellSize);
     const node = grid[row][col];
 
-    if (isDraggingStartNode) {
-      if (node.type !== "empty") return; // Don't override obstacles
+    if (isDraggingStartNode && node.type === "empty") {
       setStartNode(new Node(row, col, "start"));
-    } else if (isDraggingEndNode) {
-      if (node.type !== "empty") return; // Don't override obstacles
+    } else if (isDraggingEndNode && node.type === "empty") {
       setEndNode(new Node(row, col, "end"));
     } else if (e.buttons === 1) {
       handleMouseDown(e);
@@ -144,5 +142,5 @@ export default function Canvas(props) {
     }
   }
 
-  return <canvas ref={canvasRef} width={props.width} height={props.height} />;
+  return <canvas ref={canvasRef} width={props.sideLength} height={props.sideLength} />;
 }
