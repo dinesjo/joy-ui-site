@@ -123,6 +123,12 @@ export default function App() {
 
   function runAlgorithm() {
     console.log("Running", selectedAlgorithm);
+    if (selectedAlgorithm === "dijkstra") {
+      // Perform Dijkstra's algorithm
+      
+    } else if (selectedAlgorithm === "aStar") {
+      // 
+    }
   }
 
   return (

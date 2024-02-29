@@ -4,16 +4,20 @@ import { Node, NODE_TYPES } from "./Node";
 
 const colorMap = {
   light: {
-    obstacle: "#222",
+    obstacle: "#666",
     grid: "#e0e0e0",
     start: "#12467B",
     end: "#A51818",
+    visited: "#FFFF99",
+    path: "#964B00",
   },
   dark: {
-    obstacle: "#888",
+    obstacle: "#666",
     grid: "#333",
     start: "#2255AB",
     end: "#A51818",
+    visited: "#FFFF99",
+    path: "#964B00",
   },
 };
 
@@ -46,15 +50,18 @@ export default function Canvas(props) {
           // Draw the obstacle
           context.fillStyle = colorMap[theme].obstacle;
           context.fillRect(x, y, cellSize, cellSize);
-        }
-        if (node.type === "start") {
+        } else if (node.type === "start") {
           // Draw the start node
           context.fillStyle = colorMap[theme].start;
           context.fillRect(x, y, cellSize, cellSize);
-        }
-        if (node.type === "end") {
+        } else if (node.type === "end") {
           // Draw the end node
           context.fillStyle = colorMap[theme].end;
+          context.fillRect(x, y, cellSize, cellSize);
+        } else if (node.type === "empty" && node.stage) {
+          // May still have color from algorithm visualization
+          const stage = node.stage;
+          context.fillStyle = colorMap[theme][stage];
           context.fillRect(x, y, cellSize, cellSize);
         }
       });
