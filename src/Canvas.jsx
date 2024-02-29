@@ -90,7 +90,7 @@ export default function Canvas(props) {
   }, [cellSize, grid, handleMouseDown, handleMouseMove, props.sideLength, theme]); // Re-render canvas upon changes
 
   function handleMouseDown(e) {
-    if (grid.length === 0) return;
+    if (grid.length === 0 || isDraggingEndNode || isDraggingStartNode) return;
 
     const row = Math.floor(e.offsetY / cellSize);
     const col = Math.floor(e.offsetX / cellSize);

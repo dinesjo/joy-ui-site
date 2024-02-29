@@ -216,7 +216,7 @@ export default function App() {
           gridSize={gridSize}
           grid={grid}
           setGrid={setGrid}
-          sideLength={parent.innerHeight - 120} // navbar height
+          sideLength={Math.min(parent.innerHeight - 120, parent.innerWidth)} // navbar height
           theme={useColorScheme().mode}
           startNode={startNode}
           setStartNode={setStartNode}
