@@ -10,6 +10,7 @@ const colorMap = {
     end: "#A51818",
     visited: "#FFFF99",
     path: "#964B00",
+    considered: "#FFCC66",
   },
   dark: {
     obstacle: "#666",
@@ -18,6 +19,7 @@ const colorMap = {
     end: "#A51818",
     visited: "#FFFF99",
     path: "#964B00",
+    considered: "#FFCC66",
   },
 };
 
@@ -58,11 +60,18 @@ export default function Canvas(props) {
           // Draw the end node
           context.fillStyle = colorMap[theme].end;
           context.fillRect(x, y, cellSize, cellSize);
-        } else if (node.type === "empty" && node.stage) {
+        } else if (node.type === "empty") {
           // May still have color from algorithm visualization
-          const stage = node.stage;
-          context.fillStyle = colorMap[theme][stage];
-          context.fillRect(x, y, cellSize, cellSize);
+          if (node.path) {
+            context.fillStyle = colorMap[theme].path;
+            context.fillRect(x, y, cellSize, cellSize);
+          } else if (node.visited) {
+            context.fillStyle = colorMap[theme].visited;
+            context.fillRect(x, y, cellSize, cellSize);
+          } else if (node.previousNode) {
+            context.fillStyle = colorMap[theme].considered;
+            context.fillRect(x, y, cellSize, cellSize);
+          }
         }
       });
     });

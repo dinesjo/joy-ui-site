@@ -144,7 +144,7 @@ export default function App() {
       // Perform Dijkstra's algorithm
       let unvisitedNodes = grid.flat();
       let visitedNodes = [];
-      // startNode.distance = 0;
+      // Set startnode distance to 0
       setGrid((prevGrid) => {
         const newGrid = [...prevGrid];
         newGrid[startNode.row][startNode.col].distance = 0;
@@ -159,6 +159,10 @@ export default function App() {
         visitedNodes.push(closestNode);
         if (closestNode.type === "end") {
           console.log("Path found");
+          while (closestNode.previousNode) {
+            closestNode.path = true;
+            closestNode = closestNode.previousNode;
+          }
           break;
         }
         updateUnvisitedNeighbors(closestNode, grid);
@@ -183,6 +187,22 @@ export default function App() {
       if (col < grid[0].length - 1) neighbors.push(grid[row][col + 1]);
       return neighbors.filter((neighbor) => !neighbor.visited);
     }
+  }
+
+  function visualize() {
+    clearVisualize();
+    runAlgorithm();
+  }
+
+  function clearVisualize() {
+    grid.forEach((row) => {
+      row.forEach((node) => {
+        node.visited = false;
+        node.path = false;
+        node.previousNode = null;
+        node.distance = Infinity;
+      });
+    });
   }
 
   return (
@@ -257,7 +277,7 @@ export default function App() {
               A*
             </Option>
           </Select>
-          <Button color="primary" size="sm" onClick={runAlgorithm}>
+          <Button color="primary" size="sm" onClick={visualize}>
             Visualize
           </Button>
         </Stack>
