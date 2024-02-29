@@ -9,6 +9,7 @@ export class Node {
     this.row = row;
     this.col = col;
     this.type = NODE_TYPES.EMPTY;
+    this.distance = Infinity;
   }
 }
 

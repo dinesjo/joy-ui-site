@@ -55,6 +55,17 @@ export default function App() {
   const [endNode, setEndNode] = useState(JSON.parse(localStorage.getItem("endNode")) || new Node(7, 10, "end"));
   // When changing start/end nodes, remove the previous start/end nodes from grid
   useEffect(() => {
+    if (grid.length == 0) {
+      let newGrid = [];
+      for (let row = 0; row < gridSize; row++) {
+        let currentRow = [];
+        for (let col = 0; col < gridSize; col++) {
+          currentRow.push(new Node(row, col));
+        }
+        newGrid.push(currentRow);
+      }
+      setGrid(newGrid);
+    }
     setGrid((prevGrid) => {
       // Ensure the only node.type=start/end-nodes are the ones in startNode/endNode
       let newGrid = [...prevGrid];
@@ -76,6 +87,12 @@ export default function App() {
     localStorage.setItem("startNode", JSON.stringify(startNode));
     localStorage.setItem("endNode", JSON.stringify(endNode));
   }, [startNode, endNode]);
+
+  function reset() {
+    setStartNode(new Node(2, 2, "start"));
+    setEndNode(new Node(7, 10, "end"));
+    setGrid([]);
+  }
 
   // Clear the grid and set the start and end nodes
   // useEffect(() => {
@@ -125,9 +142,46 @@ export default function App() {
     console.log("Running", selectedAlgorithm);
     if (selectedAlgorithm === "dijkstra") {
       // Perform Dijkstra's algorithm
-      
+      let unvisitedNodes = grid.flat();
+      let visitedNodes = [];
+      // startNode.distance = 0;
+      setGrid((prevGrid) => {
+        const newGrid = [...prevGrid];
+        newGrid[startNode.row][startNode.col].distance = 0;
+        return newGrid;
+      });
+      while (unvisitedNodes.length > 0) {
+        unvisitedNodes.sort((a, b) => a.distance - b.distance);
+        let closestNode = unvisitedNodes.shift();
+        if (closestNode.type === "obstacle") continue;
+        if (closestNode.distance === Infinity) break;
+        closestNode.visited = true;
+        visitedNodes.push(closestNode);
+        if (closestNode.type === "end") {
+          console.log("Path found");
+          break;
+        }
+        updateUnvisitedNeighbors(closestNode, grid);
+      }
     } else if (selectedAlgorithm === "aStar") {
-      // 
+      //
+    }
+    function updateUnvisitedNeighbors(node, grid) {
+      const neighbors = getNeighbors(node, grid);
+      for (const neighbor of neighbors) {
+        neighbor.distance = node.distance + 1;
+        neighbor.previousNode = node;
+      }
+    }
+
+    function getNeighbors(node, grid) {
+      const neighbors = [];
+      const { row, col } = node;
+      if (row > 0) neighbors.push(grid[row - 1][col]);
+      if (row < grid.length - 1) neighbors.push(grid[row + 1][col]);
+      if (col > 0) neighbors.push(grid[row][col - 1]);
+      if (col < grid[0].length - 1) neighbors.push(grid[row][col + 1]);
+      return neighbors.filter((neighbor) => !neighbor.visited);
     }
   }
 
@@ -140,11 +194,11 @@ export default function App() {
         spacing={6}
         sx={{ width: "100vw", px: 2, py: 2.5 }}
       >
-        <Box sx={{ width: 250 }}>
-          <Typography startDecorator={<FaBorderAll />}>
+        {/* <Box sx={{ width: 250 }}> */}
+        {/* <Typography startDecorator={<FaBorderAll />}>
             Grid Size [{gridSize}x{gridSize}]
-          </Typography>
-          <Slider
+          </Typography> */}
+        {/* <Slider
             disabled
             valueLabelDisplay="auto"
             defaultValue={20}
@@ -161,8 +215,9 @@ export default function App() {
               }
               // TODO: else: display error message to user
             }}
-          />
-        </Box>
+          /> */}
+        <Button onClick={reset}>Reset</Button>
+        {/* </Box> */}
         <Stack direction="column" justifyContent="center" alignItems="center" spacing={2}>
           <Button
             color="danger"
