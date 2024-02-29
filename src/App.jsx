@@ -13,37 +13,10 @@ import {
   useColorScheme,
 } from "@mui/joy";
 import { useCallback, useEffect, useState } from "react";
-import { FaBorderAll, FaEraser, FaMoon, FaPencilAlt, FaSun } from "react-icons/fa";
+import { FaBorderAll, FaEraser, FaPencilAlt } from "react-icons/fa";
 import { Node, NODE_TYPES } from "./Node";
 import Canvas from "./Canvas";
-
-function ModeToggle() {
-  const { mode, setMode } = useColorScheme();
-  const [mounted, setMounted] = useState(false);
-
-  // necessary for server-side rendering
-  // because mode is undefined on the server
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-  if (!mounted) {
-    return null;
-  }
-
-  return (
-    <Tooltip title={mode === "light" ? "Dark Mode" : "Light Mode"} variant="soft">
-      <Button
-        variant="plain"
-        color="neutral"
-        onClick={() => {
-          setMode(mode === "light" ? "dark" : "light");
-        }}
-      >
-        {mode === "light" ? <FaMoon /> : <FaSun />}
-      </Button>
-    </Tooltip>
-  );
-}
+import ToggleThemeButton from "./ToggleThemeButton";
 
 const sliderMarks = [
   {
@@ -69,10 +42,10 @@ const sliderMarks = [
 ];
 
 export default function App() {
-  // Initialize the grid size from local storage
   const [gridSize, setGridSize] = useState(20);
-
   const [isErasing, setIsErasing] = useState(false);
+  const [selectedAlgorithm, setSelectedAlgorithm] = useState("dijkstra");
+
   const [grid, setGrid] = useState(JSON.parse(localStorage.getItem("grid")) || []);
   useEffect(() => {
     localStorage.setItem("grid", JSON.stringify(grid));
@@ -84,7 +57,7 @@ export default function App() {
   useEffect(() => {
     setGrid((prevGrid) => {
       // Ensure the only node.type=start/end-nodes are the ones in startNode/endNode
-      const newGrid = [...prevGrid];
+      let newGrid = [...prevGrid];
       newGrid.forEach((row) => {
         row.forEach((node) => {
           if (node.type === "start") {
@@ -148,6 +121,10 @@ export default function App() {
     };
   }, [handleKeyDown, handleKeyUp]);
 
+  function runAlgorithm() {
+    console.log("Running", selectedAlgorithm);
+  }
+
   return (
     <>
       <Stack
@@ -182,7 +159,6 @@ export default function App() {
         </Box>
         <Stack direction="column" justifyContent="center" alignItems="center" spacing={2}>
           <Button
-            variant="plain"
             color="danger"
             onClick={() =>
               setGrid((prevGrid) => {
@@ -213,15 +189,19 @@ export default function App() {
         <Divider orientation="vertical" />
         <Stack direction="column" gap={1}>
           <Select defaultValue="dijkstra">
-            <Option value="dijkstra">Dijkstra</Option>
-            <Option value="aStar">A*</Option>
+            <Option value="dijkstra" onClick={() => setSelectedAlgorithm("dijkstra")}>
+              Dijsktra
+            </Option>
+            <Option value="aStar" onClick={() => setSelectedAlgorithm("aStar")}>
+              A*
+            </Option>
           </Select>
-          <Button variant="plain" color="primary" size="sm">
+          <Button color="primary" size="sm" onClick={runAlgorithm}>
             Visualize
           </Button>
         </Stack>
         <Divider orientation="vertical" />
-        <ModeToggle />
+        <ToggleThemeButton />
       </Stack>
 
       <Sheet

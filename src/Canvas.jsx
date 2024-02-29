@@ -22,7 +22,7 @@ export default function Canvas(props) {
   const cellSize = props.sideLength / gridSize;
   const canvasRef = useRef(null); // Reference to the canvas element
   const [isDraggingStartNode, setIsDraggingStartNode] = useState(false);
-  const [isDraggingEndNode, setIsDraggingEndNode] = useState(false);  
+  const [isDraggingEndNode, setIsDraggingEndNode] = useState(false);
 
   // Draw the grid and obstacles
   useEffect(() => {
@@ -70,7 +70,7 @@ export default function Canvas(props) {
       canvas.removeEventListener("mousemove", handleMouseMove);
       canvas.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [cellSize, grid]); // Re-render canvas upon changes
+  }, [cellSize, grid, theme]); // Re-render canvas upon changes
 
   function handleMouseDown(e) {
     if (grid.length === 0 || isDraggingEndNode || isDraggingStartNode) return;
