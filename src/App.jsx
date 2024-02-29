@@ -70,13 +70,13 @@ const sliderMarks = [
 
 export default function App() {
   // Initialize the grid size from local storage
-  const [gridSize, setGridSize] = useState(parseInt(localStorage.getItem("gridSize")) || 30);
-  useEffect(() => {
-    localStorage.setItem("gridSize", gridSize);
-  }, [gridSize]);
+  const [gridSize, setGridSize] = useState(20);
 
   const [isErasing, setIsErasing] = useState(false);
-  const [grid, setGrid] = useState([]); // Initialize as an empty grid
+  const [grid, setGrid] = useState(JSON.parse(localStorage.getItem("grid")) || []);
+  useEffect(() => {
+    localStorage.setItem("grid", JSON.stringify(grid));
+  }, [grid]);
 
   const [startNode, setStartNode] = useState(JSON.parse(localStorage.getItem("startNode")) || new Node(2, 2, "start"));
   const [endNode, setEndNode] = useState(JSON.parse(localStorage.getItem("endNode")) || new Node(7, 10, "end"));
@@ -103,6 +103,23 @@ export default function App() {
     localStorage.setItem("startNode", JSON.stringify(startNode));
     localStorage.setItem("endNode", JSON.stringify(endNode));
   }, [startNode, endNode]);
+
+  // Clear the grid and set the start and end nodes
+  // useEffect(() => {
+  //   let grid = [];
+  //   for (let row = 0; row < gridSize; row++) {
+  //     let currentRow = [];
+  //     for (let col = 0; col < gridSize; col++) {
+  //       currentRow.push(new Node(row, col));
+  //     }
+  //     grid.push(currentRow);
+  //   }
+  //   // Add the start and end nodes
+  //   grid[startNode.row][startNode.col].type = "start";
+  //   grid[endNode.row][endNode.col].type = "end";
+
+  //   setGrid(grid);
+  // }, [gridSize]);
 
   const handleKeyDown = useCallback(
     (e) => {
@@ -145,6 +162,7 @@ export default function App() {
             Grid Size [{gridSize}x{gridSize}]
           </Typography>
           <Slider
+            disabled
             valueLabelDisplay="auto"
             defaultValue={20}
             value={gridSize}
@@ -155,10 +173,10 @@ export default function App() {
             onChange={(_, v) => {
               // Don't allow grid size to exceed start/end node positions
               const max = Math.max(startNode.row, startNode.col, endNode.row, endNode.col);
-              if (v > max) {
-                // TODO: display error message to user
+              if (v > max && v !== gridSize) {
                 setGridSize(v);
               }
+              // TODO: else: display error message to user
             }}
           />
         </Box>
