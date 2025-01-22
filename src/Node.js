@@ -5,10 +5,10 @@
  * @param {string} type - The type of the node
  */
 export class Node {
-  constructor(row, col) {
+  constructor(row, col, type = NODE_TYPES.EMPTY) {
     this.row = row;
     this.col = col;
-    this.type = NODE_TYPES.EMPTY;
+    this.type = type;
   }
 }
 
@@ -17,4 +17,6 @@ export const NODE_TYPES = {
   END: "end",
   OBSTACLE: "obstacle",
   EMPTY: "empty",
+  CONSIDERED: "considered",
+  PATH: "path",
 };

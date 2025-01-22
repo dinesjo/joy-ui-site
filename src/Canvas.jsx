@@ -8,74 +8,51 @@ const colorMap = {
     grid: "#e0e0e0",
     start: "#12467B",
     end: "#A51818",
+    considered: "#FFD700",
+    path: "#00FF00",
   },
   dark: {
     obstacle: "#888",
     grid: "#333",
     start: "#2255AB",
     end: "#A51818",
+    considered: "#FFD700",
+    path: "#00FF00",
   },
 };
 
-export default function Canvas(props) {
-  const { gridSize, grid, setGrid, theme, startNode, setStartNode, endNode, setEndNode } = props;
-  const cellSize = props.sideLength / gridSize;
-  const canvasRef = useRef(null); // Reference to the canvas element
+export default function Canvas({ gridSize, isErasing, sideLength, grid, setGrid, theme, setStartNode, setEndNode }) {
+  const cellSize = sideLength / gridSize;
+  const canvasRef = useRef(null);
   const [isDraggingStartNode, setIsDraggingStartNode] = useState(false);
   const [isDraggingEndNode, setIsDraggingEndNode] = useState(false);
 
-  // Clear the grid and set the start and end nodes
-  useEffect(() => {
-    let grid = [];
-    for (let row = 0; row < gridSize; row++) {
-      let currentRow = [];
-      for (let col = 0; col < gridSize; col++) {
-        currentRow.push(new Node(row, col));
-      }
-      grid.push(currentRow);
-    }
-    // Add the start and end nodes
-    grid[startNode.row][startNode.col].type = "start";
-    grid[endNode.row][endNode.col].type = "end";
+  // Remove grid initialization useEffect - now handled by useGrid
 
-    setGrid(grid);
-  }, [gridSize]);
-
-  // Draw the grid and obstacles
   useEffect(() => {
-    // Get the canvas context
     const canvas = canvasRef.current;
-    const context = canvasRef.current.getContext("2d");
+    const context = canvas.getContext("2d");
 
-    // Clear the canvas
-    context.clearRect(0, 0, context.canvas.width, props.sideLength);
+    const drawGrid = () => {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.strokeStyle = colorMap[theme].grid;
 
-    // Set the grid color
-    context.strokeStyle = colorMap[theme].grid;
+      grid.forEach((row) => {
+        row.forEach((node) => {
+          const x = node.col * cellSize;
+          const y = node.row * cellSize;
 
-    // Draw grid from the grid state
-    grid.forEach((row) => {
-      row.forEach((node) => {
-        const x = node.col * cellSize;
-        const y = node.row * cellSize;
-        context.strokeRect(x, y, cellSize, cellSize);
-        if (node.type === NODE_TYPES.OBSTACLE) {
-          // Draw the obstacle
-          context.fillStyle = colorMap[theme].obstacle;
-          context.fillRect(x, y, cellSize, cellSize);
-        }
-        if (node.type === "start") {
-          // Draw the start node
-          context.fillStyle = colorMap[theme].start;
-          context.fillRect(x, y, cellSize, cellSize);
-        }
-        if (node.type === "end") {
-          // Draw the end node
-          context.fillStyle = colorMap[theme].end;
-          context.fillRect(x, y, cellSize, cellSize);
-        }
+          context.strokeRect(x, y, cellSize, cellSize);
+
+          if (node.type !== "empty") {
+            context.fillStyle = colorMap[theme][node.type];
+            context.fillRect(x, y, cellSize, cellSize);
+          }
+        });
       });
-    });
+    };
+
+    drawGrid();
 
     canvas.addEventListener("mousedown", handleMouseDown);
     canvas.addEventListener("mousemove", handleMouseMove);
@@ -87,7 +64,7 @@ export default function Canvas(props) {
       canvas.removeEventListener("mousemove", handleMouseMove);
       canvas.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [cellSize, grid, handleMouseDown, handleMouseMove, props.sideLength, theme]); // Re-render canvas upon changes
+  }, [grid, cellSize, theme]);
 
   function handleMouseDown(e) {
     if (grid.length === 0 || isDraggingEndNode || isDraggingStartNode) return;
@@ -106,7 +83,7 @@ export default function Canvas(props) {
       // Handle drawing obstacles logic here
       setGrid((prevGrid) => {
         const newGrid = [...prevGrid];
-        newGrid[row][col] = { ...node, type: props.isErasing ? "empty" : NODE_TYPES.OBSTACLE };
+        newGrid[row][col] = { ...node, type: isErasing ? "empty" : NODE_TYPES.OBSTACLE };
         return newGrid;
       });
     }
@@ -133,5 +110,5 @@ export default function Canvas(props) {
     setIsDraggingEndNode(false);
   }
 
-  return <canvas ref={canvasRef} width={props.sideLength} height={props.sideLength} />;
+  return <canvas ref={canvasRef} width={sideLength} height={sideLength} />;
 }
