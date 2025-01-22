@@ -9,6 +9,15 @@ export class Node {
     this.row = row;
     this.col = col;
     this.type = type;
+    this.distance = Infinity;
+    this.isVisited = false;
+    this.previousNode = null;
+  }
+
+  reset() {
+    this.distance = Infinity;
+    this.isVisited = false;
+    this.previousNode = null;
   }
 }
 

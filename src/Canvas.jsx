@@ -8,16 +8,16 @@ const colorMap = {
     grid: "#e0e0e0",
     start: "#12467B",
     end: "#A51818",
-    considered: "#FFD700",
-    path: "#00FF00",
+    considered: "#c5dedf",
+    path: "#4e7bb6",
   },
   dark: {
     obstacle: "#888",
     grid: "#333",
     start: "#2255AB",
     end: "#A51818",
-    considered: "#FFD700",
-    path: "#00FF00",
+    considered: "#c5dedf",
+    path: "#4e7bb6",
   },
 };
 
@@ -96,9 +96,9 @@ export default function Canvas({ gridSize, isErasing, sideLength, grid, setGrid,
     const col = Math.floor(e.offsetX / cellSize);
     const node = grid[row][col];
 
-    if (isDraggingStartNode && node.type === "empty") {
+    if (isDraggingStartNode && [NODE_TYPES.EMPTY, NODE_TYPES.CONSIDERED, NODE_TYPES.PATH].includes(node.type)) {
       setStartNode(new Node(row, col, "start"));
-    } else if (isDraggingEndNode && node.type === "empty") {
+    } else if (isDraggingEndNode && [NODE_TYPES.EMPTY, NODE_TYPES.CONSIDERED, NODE_TYPES.PATH].includes(node.type)) {
       setEndNode(new Node(row, col, "end"));
     } else if (e.buttons === 1) {
       handleMouseDown(e);

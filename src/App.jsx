@@ -25,9 +25,10 @@ export default function App() {
         isErasing={isErasing}
         setIsErasing={setIsErasing}
         setGrid={setGrid}
+        resizeGrid={resizeGrid}
+        grid={grid}
         startNode={startNode}
         endNode={endNode}
-        resizeGrid={resizeGrid}
       />
       <Sheet
         sx={{

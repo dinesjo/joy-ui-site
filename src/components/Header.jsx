@@ -4,8 +4,11 @@ import ModeToggle from "./ModeToggle";
 import { FaBorderAll, FaEraser, FaPencilAlt } from "react-icons/fa";
 import { SLIDER_MARKS } from "../constants/config";
 import { NODE_TYPES } from "../Node";
+import { usePathfinder } from '../hooks/usePathfinder';
 
-export default function Header({ gridSize, setGridSize, isErasing, setGrid, setIsErasing, resizeGrid }) {
+export default function Header({ gridSize, setGridSize, isErasing, setGrid, setIsErasing, resizeGrid, grid, startNode, endNode }) {
+  const { visualizeDijkstra, isVisualizing } = usePathfinder(grid, startNode, endNode, setGrid);
+
   function handleGridResize(newSize) {
     setGridSize(newSize);
     resizeGrid(newSize);
@@ -66,12 +69,18 @@ export default function Header({ gridSize, setGridSize, isErasing, setGrid, setI
       </Stack>
       <Divider orientation="vertical" />
       <Stack direction="column" gap={1}>
-        <Select defaultValue="dijkstra">
+        <Select defaultValue="dijkstra" disabled={isVisualizing}>
           <Option value="dijkstra">Dijkstra</Option>
           <Option value="aStar">A*</Option>
         </Select>
-        <Button variant="plain" color="primary" size="sm">
-          Visualize
+        <Button 
+          variant="plain" 
+          color="primary" 
+          size="sm"
+          disabled={isVisualizing}
+          onClick={visualizeDijkstra}
+        >
+          {isVisualizing ? 'Visualizing...' : 'Visualize'}
         </Button>
       </Stack>
       <Divider orientation="vertical" />
