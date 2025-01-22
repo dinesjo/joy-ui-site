@@ -15,3 +15,5 @@ export const SLIDER_MARKS = [
 
 export const START_NODE = { row: 2, col: 2 };
 export const END_NODE = { row: 7, col: 10 };
+
+export const CROSS_PRODUCT_WEIGHT = 0.001; // Weight for the cross product in the alignment score

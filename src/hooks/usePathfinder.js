@@ -43,6 +43,8 @@ export function usePathfinder(grid, startNode, endNode, setGrid, showSnackbar) {
       return;
     }
 
+    const timeout = 500 / grid.length ^ (1.5);
+
     for (let i = 0; i < visitedNodesInOrder.length; i++) {
       if (i === visitedNodesInOrder.length - 1) {
         setTimeout(() => {
@@ -51,7 +53,7 @@ export function usePathfinder(grid, startNode, endNode, setGrid, showSnackbar) {
           } else {
             setIsVisualizing(false); // Reset if no path to animate
           }
-        }, 10 * i);
+        }, timeout * i);
         return;
       }
       setTimeout(() => {
@@ -66,7 +68,7 @@ export function usePathfinder(grid, startNode, endNode, setGrid, showSnackbar) {
           }
           return newGrid;
         });
-      }, 10 * i);
+      }, timeout * i);
     }
   };
 

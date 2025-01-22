@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { Stack, Divider, Box, Typography, Slider, Tooltip, Switch, Select, Button, Option } from "@mui/joy";
+import { Stack, Divider, Box, Typography, Slider, Tooltip, Switch, Button, Option, ToggleButtonGroup } from "@mui/joy";
 import { FaBorderAll, FaEraser, FaPencilAlt } from "react-icons/fa";
 import { SLIDER_MARKS } from "../constants/config";
 import { NODE_TYPES } from "../Node";
@@ -55,6 +55,15 @@ export default function Header({
       </Box>
       <Divider orientation="vertical" />
       <Stack direction="column" justifyContent="center" alignItems="center" spacing={2}>
+        <Tooltip title="Tip: Hold Shift to erase quickly">
+          <Switch
+            variant="solid"
+            startDecorator={<FaPencilAlt />}
+            endDecorator={<FaEraser />}
+            onChange={() => setIsErasing((prev) => !prev)}
+            checked={isErasing}
+          />
+        </Tooltip>
         <Button
           variant="plain"
           color="danger"
@@ -74,22 +83,20 @@ export default function Header({
         >
           Clear All Obstacles
         </Button>
-        <Tooltip title="Tip: Hold Shift to erase quickly">
-          <Switch
-            variant="solid"
-            startDecorator={<FaPencilAlt />}
-            endDecorator={<FaEraser />}
-            onChange={() => setIsErasing((prev) => !prev)}
-            checked={isErasing}
-          />
-        </Tooltip>
       </Stack>
       <Divider orientation="vertical" />
       <Stack direction="column" gap={1}>
-        <Select value={algorithm} onChange={(_, value) => setAlgorithm(value)} disabled={isVisualizing}>
-          <Option value="dijkstra">Dijkstra</Option>
-          <Option value="aStar">A*</Option>
-        </Select>
+        <ToggleButtonGroup
+          value={algorithm}
+          onChange={(_, value) => value && setAlgorithm(value)}
+          disabled={isVisualizing}
+          size="sm"
+        >
+          <Tooltip title="Uses cross-product heuristic">
+            <Button value="dijkstra">Dijkstra&apos;s</Button>
+          </Tooltip>
+          <Button value="aStar">A*</Button>
+        </ToggleButtonGroup>
         <Button variant="plain" color="primary" size="sm" disabled={isVisualizing} onClick={visualizeAlgorithm}>
           {isVisualizing ? "Visualizing..." : "Visualize"}
         </Button>

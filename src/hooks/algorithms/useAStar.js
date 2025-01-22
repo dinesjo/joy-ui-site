@@ -1,3 +1,4 @@
+import { CROSS_PRODUCT_WEIGHT } from '../../constants/config';
 import { NODE_TYPES } from '../../Node';
 
 export function useAStar() {
@@ -24,7 +25,7 @@ export function useAStar() {
     const deviation = pathLength ? crossProduct / pathLength : 0;
 
     // Return a score that increases with deviation
-    return deviation * 0.5; // Adjust weight as needed
+    return deviation * CROSS_PRODUCT_WEIGHT;
   };
 
   const getTotalHeuristic = (node, startNode, endNode) => {
