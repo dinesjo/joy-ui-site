@@ -1,44 +1,21 @@
 import { Sheet, useColorScheme } from "@mui/joy";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Canvas from "./Canvas";
 import Header from "./components/Header";
 import { useGrid } from "./hooks/useGrid";
+import useEraser from "./hooks/useEraser";
 
 export default function App() {
+  // Grid size state
   const [gridSize, setGridSize] = useState(parseInt(localStorage.getItem("gridSize")) || 30);
-  const [isErasing, setIsErasing] = useState(false);
-
   const { grid, setGrid, startNode, setStartNode, endNode, setEndNode, resizeGrid } = useGrid(gridSize);
+
+  // Eraser state
+  const { isErasing, setIsErasing } = useEraser();
+
   useEffect(() => {
     localStorage.setItem("gridSize", gridSize);
   }, [gridSize]);
-
-  const handleKeyDown = useCallback(
-    (e) => {
-      if (e.key === "Shift") {
-        setIsErasing(true);
-      }
-    },
-    [setIsErasing]
-  );
-
-  const handleKeyUp = useCallback(
-    (e) => {
-      if (e.key === "Shift") {
-        setIsErasing(false);
-      }
-    },
-    [setIsErasing]
-  );
-
-  useEffect(() => {
-    document.addEventListener("keydown", handleKeyDown);
-    document.addEventListener("keyup", handleKeyUp);
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.removeEventListener("keyup", handleKeyUp);
-    };
-  }, [handleKeyDown, handleKeyUp]);
 
   return (
     <>

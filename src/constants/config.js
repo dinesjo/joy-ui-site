@@ -12,3 +12,6 @@ export const SLIDER_MARKS = [
   { value: 80, label: "80" },
   { value: 100, label: "100" }
 ];
+
+export const START_NODE = { row: 2, col: 2 };
+export const END_NODE = { row: 7, col: 10 };

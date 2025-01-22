@@ -6,10 +6,10 @@ import { SLIDER_MARKS } from "../constants/config";
 import { NODE_TYPES } from "../Node";
 
 export default function Header({ gridSize, setGridSize, isErasing, setGrid, setIsErasing, resizeGrid }) {
-  const handleGridResize = (newSize) => {
+  function handleGridResize(newSize) {
     setGridSize(newSize);
     resizeGrid(newSize);
-  };
+  }
 
   return (
     <Stack

@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import { Node } from "../Node";
+import { END_NODE, START_NODE } from "../constants/config";
 
 export function useGrid(gridSize) {
   // Initialize nodes first
   const [startNode, setStartNode] = useState(
-    JSON.parse(localStorage.getItem("startNode")) || new Node(2, 2, "start")
+    JSON.parse(localStorage.getItem("startNode")) || new Node(START_NODE.row, START_NODE.col, "start")
   );
   const [endNode, setEndNode] = useState(
-    JSON.parse(localStorage.getItem("endNode")) || new Node(7, 10, "end")
+    JSON.parse(localStorage.getItem("endNode")) || new Node(END_NODE.row, END_NODE.col, "end")
   );
 
   // Create initial grid generation function
