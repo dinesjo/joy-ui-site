@@ -1,4 +1,4 @@
-import { Sheet, Snackbar, Box } from "@mui/joy";
+import { Sheet, Snackbar, Card } from "@mui/joy";
 import { useEffect, useState } from "react";
 import Canvas from "./Canvas";
 import Header from "./components/Header";
@@ -39,9 +39,10 @@ export default function App() {
         sx={{
           display: "grid",
           placeItems: "center",
+          bgcolor: "background.body",
         }}
       >
-        <Box>
+        <Card sx={{ p: 0, overflow: "hidden", borderWidth: 3 }}>
           <Canvas
             gridSize={gridSize}
             grid={grid}
@@ -51,7 +52,7 @@ export default function App() {
             setEndNode={setEndNode}
             isErasing={isErasing}
           />
-        </Box>
+        </Card>
       </Sheet>
       <Snackbar
         variant="soft"

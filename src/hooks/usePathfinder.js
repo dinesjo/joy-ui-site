@@ -43,7 +43,7 @@ export function usePathfinder(grid, startNode, endNode, setGrid, showSnackbar) {
       return;
     }
 
-    const timeout = 500 / grid.length ^ (1.5);
+    const timeout = 200 / grid.length ^ (1.5);
 
     for (let i = 0; i < visitedNodesInOrder.length; i++) {
       if (i === visitedNodesInOrder.length - 1) {

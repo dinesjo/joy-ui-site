@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { Stack, Divider, Box, Typography, Slider, Tooltip, Switch, Button, Option, ToggleButtonGroup } from "@mui/joy";
+import { Stack, Divider, Box, Typography, Slider, Tooltip, Switch, Button, ToggleButtonGroup } from "@mui/joy";
 import { FaBorderAll, FaEraser, FaPencilAlt } from "react-icons/fa";
 import { SLIDER_MARKS } from "../constants/config";
 import { NODE_TYPES } from "../Node";
@@ -92,9 +92,7 @@ export default function Header({
           disabled={isVisualizing}
           size="sm"
         >
-          <Tooltip title="Uses cross-product heuristic">
-            <Button value="dijkstra">Dijkstra&apos;s</Button>
-          </Tooltip>
+          <Button value="dijkstra">Dijkstra&apos;s</Button>
           <Button value="aStar">A*</Button>
         </ToggleButtonGroup>
         <Button variant="plain" color="primary" size="sm" disabled={isVisualizing} onClick={visualizeAlgorithm}>
