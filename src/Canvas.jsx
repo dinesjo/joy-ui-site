@@ -26,8 +26,7 @@ export default function Canvas({ gridSize, isErasing, sideLength, grid, setGrid,
   const canvasRef = useRef(null);
   const [isDraggingStartNode, setIsDraggingStartNode] = useState(false);
   const [isDraggingEndNode, setIsDraggingEndNode] = useState(false);
-
-  // Remove grid initialization useEffect - now handled by useGrid
+  const [isMousePressed, setIsMousePressed] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -54,21 +53,57 @@ export default function Canvas({ gridSize, isErasing, sideLength, grid, setGrid,
 
     drawGrid();
 
+    const handleGlobalMouseUp = (e) => {
+      if (isDraggingStartNode || isDraggingEndNode) {
+        // Ensure one final node update at mouse release position
+        const rect = canvas.getBoundingClientRect();
+        const row = Math.floor((e.clientY - rect.top) / cellSize);
+        const col = Math.floor((e.clientX - rect.left) / cellSize);
+
+        if (row >= 0 && row < gridSize && col >= 0 && col < gridSize) {
+          const node = grid[row][col];
+          if (isDraggingStartNode && [NODE_TYPES.EMPTY, NODE_TYPES.CONSIDERED, NODE_TYPES.PATH].includes(node.type)) {
+            setStartNode(new Node(row, col, "start"));
+          } else if (
+            isDraggingEndNode &&
+            [NODE_TYPES.EMPTY, NODE_TYPES.CONSIDERED, NODE_TYPES.PATH].includes(node.type)
+          ) {
+            setEndNode(new Node(row, col, "end"));
+          }
+        }
+      }
+
+      // Clear all drag states
+      setIsDraggingStartNode(false);
+      setIsDraggingEndNode(false);
+      setIsMousePressed(false);
+    };
+
+    const handleMouseLeave = () => {
+      // Clear drag states when mouse leaves canvas
+      if (!isDraggingStartNode && !isDraggingEndNode) {
+        setIsMousePressed(false);
+      }
+    };
+
     canvas.addEventListener("mousedown", handleMouseDown);
     canvas.addEventListener("mousemove", handleMouseMove);
-    canvas.addEventListener("mouseup", handleMouseUp);
+    canvas.addEventListener("mouseleave", handleMouseLeave);
+    window.addEventListener("mouseup", handleGlobalMouseUp);
 
     return () => {
       // Remove event listeners on cleanup
       canvas.removeEventListener("mousedown", handleMouseDown);
       canvas.removeEventListener("mousemove", handleMouseMove);
-      canvas.removeEventListener("mouseup", handleMouseUp);
+      canvas.removeEventListener("mouseleave", handleMouseLeave);
+      window.removeEventListener("mouseup", handleGlobalMouseUp);
     };
-  }, [grid, cellSize, theme]);
+  }, [grid, cellSize, theme, isDraggingStartNode, isDraggingEndNode, gridSize]);
 
   function handleMouseDown(e) {
-    if (grid.length === 0 || isDraggingEndNode || isDraggingStartNode) return;
+    if (grid.length === 0) return;
 
+    setIsMousePressed(true);
     const row = Math.floor(e.offsetY / cellSize);
     const col = Math.floor(e.offsetX / cellSize);
     const node = grid[row][col];
@@ -80,7 +115,13 @@ export default function Canvas({ gridSize, isErasing, sideLength, grid, setGrid,
       setIsDraggingEndNode(true);
       setEndNode(new Node(row, col, "end"));
     } else {
-      // Handle drawing obstacles logic here
+      drawNode(row, col);
+    }
+  }
+
+  function drawNode(row, col) {
+    const node = grid[row][col];
+    if (node && !isDraggingStartNode && !isDraggingEndNode) {
       setGrid((prevGrid) => {
         const newGrid = [...prevGrid];
         newGrid[row][col] = { ...node, type: isErasing ? "empty" : NODE_TYPES.OBSTACLE };
@@ -90,24 +131,23 @@ export default function Canvas({ gridSize, isErasing, sideLength, grid, setGrid,
   }
 
   function handleMouseMove(e) {
-    if (grid.length === 0) return;
+    if (!isMousePressed || grid.length === 0) return;
 
-    const row = Math.floor(e.offsetY / cellSize);
-    const col = Math.floor(e.offsetX / cellSize);
+    const rect = e.target.getBoundingClientRect();
+    const row = Math.floor((e.clientY - rect.top) / cellSize);
+    const col = Math.floor((e.clientX - rect.left) / cellSize);
+
+    if (row < 0 || row >= gridSize || col < 0 || col >= gridSize) return;
+
     const node = grid[row][col];
 
     if (isDraggingStartNode && [NODE_TYPES.EMPTY, NODE_TYPES.CONSIDERED, NODE_TYPES.PATH].includes(node.type)) {
       setStartNode(new Node(row, col, "start"));
     } else if (isDraggingEndNode && [NODE_TYPES.EMPTY, NODE_TYPES.CONSIDERED, NODE_TYPES.PATH].includes(node.type)) {
       setEndNode(new Node(row, col, "end"));
-    } else if (e.buttons === 1) {
-      handleMouseDown(e);
+    } else if (!isDraggingStartNode && !isDraggingEndNode) {
+      drawNode(row, col);
     }
-  }
-
-  function handleMouseUp() {
-    setIsDraggingStartNode(false);
-    setIsDraggingEndNode(false);
   }
 
   return <canvas ref={canvasRef} width={sideLength} height={sideLength} />;
