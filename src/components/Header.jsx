@@ -1,13 +1,29 @@
 /* eslint-disable react/prop-types */
 import { Stack, Divider, Box, Typography, Slider, Tooltip, Switch, Select, Button, Option } from "@mui/joy";
-import ModeToggle from "./ModeToggle";
 import { FaBorderAll, FaEraser, FaPencilAlt } from "react-icons/fa";
 import { SLIDER_MARKS } from "../constants/config";
 import { NODE_TYPES } from "../Node";
-import { usePathfinder } from '../hooks/usePathfinder';
+import { usePathfinder } from "../hooks/usePathfinder";
 
-export default function Header({ gridSize, setGridSize, isErasing, setGrid, setIsErasing, resizeGrid, grid, startNode, endNode, showSnackbar }) {
-  const { visualizeAlgorithm, isVisualizing, setAlgorithm, algorithm } = usePathfinder(grid, startNode, endNode, setGrid, showSnackbar);
+export default function Header({
+  gridSize,
+  setGridSize,
+  isErasing,
+  setGrid,
+  setIsErasing,
+  resizeGrid,
+  grid,
+  startNode,
+  endNode,
+  showSnackbar,
+}) {
+  const { visualizeAlgorithm, isVisualizing, setAlgorithm, algorithm } = usePathfinder(
+    grid,
+    startNode,
+    endNode,
+    setGrid,
+    showSnackbar
+  );
 
   function handleGridResize(newSize) {
     setGridSize(newSize);
@@ -37,6 +53,7 @@ export default function Header({ gridSize, setGridSize, isErasing, setGrid, setI
           onChange={(_, newSize) => handleGridResize(newSize)}
         />
       </Box>
+      <Divider orientation="vertical" />
       <Stack direction="column" justifyContent="center" alignItems="center" spacing={2}>
         <Button
           variant="plain"
@@ -69,26 +86,14 @@ export default function Header({ gridSize, setGridSize, isErasing, setGrid, setI
       </Stack>
       <Divider orientation="vertical" />
       <Stack direction="column" gap={1}>
-        <Select 
-          value={algorithm} 
-          onChange={(_, value) => setAlgorithm(value)} 
-          disabled={isVisualizing}
-        >
+        <Select value={algorithm} onChange={(_, value) => setAlgorithm(value)} disabled={isVisualizing}>
           <Option value="dijkstra">Dijkstra</Option>
           <Option value="aStar">A*</Option>
         </Select>
-        <Button 
-          variant="plain" 
-          color="primary" 
-          size="sm"
-          disabled={isVisualizing}
-          onClick={visualizeAlgorithm}
-        >
-          {isVisualizing ? 'Visualizing...' : 'Visualize'}
+        <Button variant="plain" color="primary" size="sm" disabled={isVisualizing} onClick={visualizeAlgorithm}>
+          {isVisualizing ? "Visualizing..." : "Visualize"}
         </Button>
       </Stack>
-      <Divider orientation="vertical" />
-      <ModeToggle />
     </Stack>
   );
 }

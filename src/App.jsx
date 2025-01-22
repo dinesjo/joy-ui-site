@@ -1,4 +1,4 @@
-import { Sheet, useColorScheme, Snackbar } from "@mui/joy";
+import { Sheet, Snackbar, Box } from "@mui/joy";
 import { useEffect, useState } from "react";
 import Canvas from "./Canvas";
 import Header from "./components/Header";
@@ -41,16 +41,17 @@ export default function App() {
           placeItems: "center",
         }}
       >
-        <Canvas
-          gridSize={gridSize}
-          grid={grid}
-          setGrid={setGrid}
-          sideLength={Math.min(parent.innerHeight - 120, parent.innerWidth)} // navbar height
-          theme={useColorScheme().mode}
-          setStartNode={setStartNode}
-          setEndNode={setEndNode}
-          isErasing={isErasing}
-        />
+        <Box>
+          <Canvas
+            gridSize={gridSize}
+            grid={grid}
+            setGrid={setGrid}
+            sideLength={Math.min(parent.innerHeight - 120, parent.innerWidth)} // navbar height
+            setStartNode={setStartNode}
+            setEndNode={setEndNode}
+            isErasing={isErasing}
+          />
+        </Box>
       </Sheet>
       <Snackbar
         variant="soft"

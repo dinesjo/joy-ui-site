@@ -2,26 +2,16 @@
 import { useEffect, useState, useRef } from "react";
 import { Node, NODE_TYPES } from "./Node";
 
-const colorMap = {
-  light: {
-    obstacle: "#222",
-    grid: "#e0e0e0",
-    start: "#12467B",
-    end: "#A51818",
-    considered: "#c5dedf",
-    path: "#4e7bb6",
-  },
-  dark: {
-    obstacle: "#888",
-    grid: "#333",
-    start: "#2255AB",
-    end: "#A51818",
-    considered: "#c5dedf",
-    path: "#4e7bb6",
-  },
+const colors = {
+  obstacle: "#222",
+  grid: "#e0e0e0",
+  start: "#12467B",
+  end: "#A51818",
+  considered: "#c5dedf",
+  path: "#4e7bb6",
 };
 
-export default function Canvas({ gridSize, isErasing, sideLength, grid, setGrid, theme, setStartNode, setEndNode }) {
+export default function Canvas({ gridSize, isErasing, sideLength, grid, setGrid, setStartNode, setEndNode }) {
   const cellSize = sideLength / gridSize;
   const canvasRef = useRef(null);
   const [isDraggingStartNode, setIsDraggingStartNode] = useState(false);
@@ -32,21 +22,38 @@ export default function Canvas({ gridSize, isErasing, sideLength, grid, setGrid,
     const canvas = canvasRef.current;
     const context = canvas.getContext("2d");
 
+    // Get device pixel ratio
+    const dpr = window.devicePixelRatio || 1;
+
+    // Set canvas size accounting for device pixel ratio
+    canvas.width = sideLength * dpr;
+    canvas.height = sideLength * dpr;
+
+    // Scale canvas back down with CSS
+    canvas.style.width = `${sideLength}px`;
+    canvas.style.height = `${sideLength}px`;
+
+    // Scale context to match device pixel ratio
+    context.scale(dpr, dpr);
+
     const drawGrid = () => {
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      context.strokeStyle = colorMap[theme].grid;
+      context.clearRect(0, 0, sideLength, sideLength);
+      context.strokeStyle = colors.grid;
+
+      // Use crisp lines
+      context.lineWidth = 1;
+      context.imageSmoothingEnabled = false;
 
       grid.forEach((row) => {
         row.forEach((node) => {
-          const x = node.col * cellSize;
-          const y = node.row * cellSize;
-
-          context.strokeRect(x, y, cellSize, cellSize);
+          const x = Math.floor(node.col * cellSize);
+          const y = Math.floor(node.row * cellSize);
 
           if (node.type !== "empty") {
-            context.fillStyle = colorMap[theme][node.type];
+            context.fillStyle = colors[node.type];
             context.fillRect(x, y, cellSize, cellSize);
           }
+          context.strokeRect(x, y, cellSize, cellSize);
         });
       });
     };
@@ -98,7 +105,7 @@ export default function Canvas({ gridSize, isErasing, sideLength, grid, setGrid,
       canvas.removeEventListener("mouseleave", handleMouseLeave);
       window.removeEventListener("mouseup", handleGlobalMouseUp);
     };
-  }, [grid, cellSize, theme, isDraggingStartNode, isDraggingEndNode, gridSize]);
+  }, [grid, cellSize, isDraggingStartNode, isDraggingEndNode, gridSize, sideLength]);
 
   function handleMouseDown(e) {
     if (grid.length === 0) return;
@@ -150,5 +157,12 @@ export default function Canvas({ gridSize, isErasing, sideLength, grid, setGrid,
     }
   }
 
-  return <canvas ref={canvasRef} width={sideLength} height={sideLength} />;
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        imageRendering: "pixelated", // Ensure sharp edges in modern browsers
+      }}
+    />
+  );
 }
