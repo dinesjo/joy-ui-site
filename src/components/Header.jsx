@@ -6,8 +6,8 @@ import { SLIDER_MARKS } from "../constants/config";
 import { NODE_TYPES } from "../Node";
 import { usePathfinder } from '../hooks/usePathfinder';
 
-export default function Header({ gridSize, setGridSize, isErasing, setGrid, setIsErasing, resizeGrid, grid, startNode, endNode }) {
-  const { visualizeDijkstra, isVisualizing } = usePathfinder(grid, startNode, endNode, setGrid);
+export default function Header({ gridSize, setGridSize, isErasing, setGrid, setIsErasing, resizeGrid, grid, startNode, endNode, showSnackbar }) {
+  const { visualizeAlgorithm, isVisualizing, setAlgorithm, algorithm } = usePathfinder(grid, startNode, endNode, setGrid, showSnackbar);
 
   function handleGridResize(newSize) {
     setGridSize(newSize);
@@ -69,7 +69,11 @@ export default function Header({ gridSize, setGridSize, isErasing, setGrid, setI
       </Stack>
       <Divider orientation="vertical" />
       <Stack direction="column" gap={1}>
-        <Select defaultValue="dijkstra" disabled={isVisualizing}>
+        <Select 
+          value={algorithm} 
+          onChange={(_, value) => setAlgorithm(value)} 
+          disabled={isVisualizing}
+        >
           <Option value="dijkstra">Dijkstra</Option>
           <Option value="aStar">A*</Option>
         </Select>
@@ -78,7 +82,7 @@ export default function Header({ gridSize, setGridSize, isErasing, setGrid, setI
           color="primary" 
           size="sm"
           disabled={isVisualizing}
-          onClick={visualizeDijkstra}
+          onClick={visualizeAlgorithm}
         >
           {isVisualizing ? 'Visualizing...' : 'Visualize'}
         </Button>
