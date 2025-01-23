@@ -17,6 +17,7 @@ export default function Canvas({ gridSize, isErasing, sideLength, grid, setGrid,
   const [isDraggingStartNode, setIsDraggingStartNode] = useState(false);
   const [isDraggingEndNode, setIsDraggingEndNode] = useState(false);
   const [isMousePressed, setIsMousePressed] = useState(false);
+  const [isTouching, setIsTouching] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -93,19 +94,83 @@ export default function Canvas({ gridSize, isErasing, sideLength, grid, setGrid,
       }
     };
 
+    const handleTouchStart = (e) => {
+      e.preventDefault(); // Prevent scrolling
+      setIsTouching(true);
+      const touch = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      const row = Math.floor((touch.clientY - rect.top) / cellSize);
+      const col = Math.floor((touch.clientX - rect.left) / cellSize);
+
+      if (row >= 0 && row < gridSize && col >= 0 && col < gridSize) {
+        const node = grid[row][col];
+        if (node.type === "start") {
+          setIsDraggingStartNode(true);
+          setStartNode(new Node(row, col, "start"));
+        } else if (node.type === "end") {
+          setIsDraggingEndNode(true);
+          setEndNode(new Node(row, col, "end"));
+        } else {
+          drawNode(row, col);
+        }
+      }
+    };
+
+    const handleTouchMove = (e) => {
+      e.preventDefault(); // Prevent scrolling
+      if (!isTouching || grid.length === 0) return;
+
+      const touch = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      const row = Math.floor((touch.clientY - rect.top) / cellSize);
+      const col = Math.floor((touch.clientX - rect.left) / cellSize);
+
+      if (row >= 0 && row < gridSize && col >= 0 && col < gridSize) {
+        const node = grid[row][col];
+        if (isDraggingStartNode && [NODE_TYPES.EMPTY, NODE_TYPES.CONSIDERED, NODE_TYPES.PATH].includes(node.type)) {
+          setStartNode(new Node(row, col, "start"));
+        } else if (
+          isDraggingEndNode &&
+          [NODE_TYPES.EMPTY, NODE_TYPES.CONSIDERED, NODE_TYPES.PATH].includes(node.type)
+        ) {
+          setEndNode(new Node(row, col, "end"));
+        } else if (!isDraggingStartNode && !isDraggingEndNode) {
+          drawNode(row, col);
+        }
+      }
+    };
+
+    const handleTouchEnd = (e) => {
+      e.preventDefault();
+      setIsTouching(false);
+      setIsDraggingStartNode(false);
+      setIsDraggingEndNode(false);
+    };
+
+    // Add touch event listeners
+    canvas.addEventListener("touchstart", handleTouchStart, { passive: false });
+    canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
+    canvas.addEventListener("touchend", handleTouchEnd, { passive: false });
+    canvas.addEventListener("touchcancel", handleTouchEnd, { passive: false });
+
     canvas.addEventListener("mousedown", handleMouseDown);
     canvas.addEventListener("mousemove", handleMouseMove);
     canvas.addEventListener("mouseleave", handleMouseLeave);
     window.addEventListener("mouseup", handleGlobalMouseUp);
 
     return () => {
+      // Remove touch event listeners
+      canvas.removeEventListener("touchstart", handleTouchStart);
+      canvas.removeEventListener("touchmove", handleTouchMove);
+      canvas.removeEventListener("touchend", handleTouchEnd);
+      canvas.removeEventListener("touchcancel", handleTouchEnd);
       // Remove event listeners on cleanup
       canvas.removeEventListener("mousedown", handleMouseDown);
       canvas.removeEventListener("mousemove", handleMouseMove);
       canvas.removeEventListener("mouseleave", handleMouseLeave);
       window.removeEventListener("mouseup", handleGlobalMouseUp);
     };
-  }, [grid, cellSize, isDraggingStartNode, isDraggingEndNode, gridSize, sideLength]);
+  }, [grid, cellSize, isDraggingStartNode, isDraggingEndNode, gridSize, sideLength, isTouching]);
 
   function handleMouseDown(e) {
     if (grid.length === 0) return;
@@ -131,7 +196,14 @@ export default function Canvas({ gridSize, isErasing, sideLength, grid, setGrid,
     if (node && !isDraggingStartNode && !isDraggingEndNode) {
       setGrid((prevGrid) => {
         const newGrid = [...prevGrid];
-        newGrid[row][col] = { ...node, type: isErasing ? "empty" : NODE_TYPES.OBSTACLE };
+        // When erasing, only allow erasing obstacles
+        if (isErasing && node.type === NODE_TYPES.OBSTACLE) {
+          newGrid[row][col] = { ...node, type: NODE_TYPES.EMPTY };
+        }
+        // When drawing, allow placing obstacles over empty, considered, or path nodes
+        else if (!isErasing && [NODE_TYPES.EMPTY, NODE_TYPES.CONSIDERED, NODE_TYPES.PATH].includes(node.type)) {
+          newGrid[row][col] = { ...node, type: NODE_TYPES.OBSTACLE };
+        }
         return newGrid;
       });
     }
@@ -162,6 +234,7 @@ export default function Canvas({ gridSize, isErasing, sideLength, grid, setGrid,
       ref={canvasRef}
       style={{
         imageRendering: "pixelated", // Ensure sharp edges in modern browsers
+        touchAction: "none", // Prevent browser touch actions
       }}
     />
   );
