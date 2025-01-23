@@ -5,6 +5,7 @@ import Header from "./components/Header";
 import { useGrid } from "./hooks/useGrid";
 import useEraser from "./hooks/useEraser";
 import { useSnackbar } from "./hooks/useSnackbar";
+import { usePathfinder } from "./hooks/usePathfinder";
 
 export default function App() {
   // Grid size state
@@ -16,6 +17,15 @@ export default function App() {
 
   // Snackbar state
   const { snackbar, showSnackbar, hideSnackbar } = useSnackbar();
+
+  // Lift pathfinder state to App level
+  const { visualizeAlgorithm, isVisualizing, setAlgorithm, algorithm, clearVisualization } = usePathfinder(
+    grid,
+    startNode,
+    endNode,
+    setGrid,
+    showSnackbar
+  );
 
   useEffect(() => {
     localStorage.setItem("gridSize", gridSize);
@@ -34,6 +44,10 @@ export default function App() {
         startNode={startNode}
         endNode={endNode}
         showSnackbar={showSnackbar}
+        isVisualizing={isVisualizing}
+        visualizeAlgorithm={visualizeAlgorithm}
+        setAlgorithm={setAlgorithm}
+        algorithm={algorithm}
       />
       <Sheet
         sx={{
@@ -51,6 +65,7 @@ export default function App() {
             setStartNode={setStartNode}
             setEndNode={setEndNode}
             isErasing={isErasing}
+            clearVisualization={clearVisualization}
           />
         </Card>
       </Sheet>

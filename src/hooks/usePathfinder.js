@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { NODE_TYPES } from '../Node';
 import { useAStar } from './algorithms/useAStar';
 import { useDijkstra } from './algorithms/useDijkstra';
@@ -6,11 +6,17 @@ import { useDijkstra } from './algorithms/useDijkstra';
 export function usePathfinder(grid, startNode, endNode, setGrid, showSnackbar) {
   const [isVisualizing, setIsVisualizing] = useState(false);
   const [algorithm, setAlgorithm] = useState('dijkstra');
+  const animationTimeouts = useRef([]); // Track animation timeouts
   const { astar } = useAStar();
   const { dijkstra } = useDijkstra();
 
   const clearVisualization = (grid) => {
-    return grid.map(row =>
+    // Clear all pending animations
+    animationTimeouts.current.forEach(timeout => clearTimeout(timeout));
+    animationTimeouts.current = [];
+    setIsVisualizing(false);
+
+    setGrid(grid.map(row =>
       row.map(node => ({
         ...node,
         distance: Infinity,
@@ -21,7 +27,7 @@ export function usePathfinder(grid, startNode, endNode, setGrid, showSnackbar) {
           ? node.type
           : NODE_TYPES.EMPTY
       }))
-    );
+    ));
   };
 
   const getNodesInShortestPath = (finishNode) => {
@@ -47,16 +53,17 @@ export function usePathfinder(grid, startNode, endNode, setGrid, showSnackbar) {
 
     for (let i = 0; i < visitedNodesInOrder.length; i++) {
       if (i === visitedNodesInOrder.length - 1) {
-        setTimeout(() => {
+        const timeoutId = setTimeout(() => {
           if (shortestPath.length) {
             animateShortestPath(shortestPath);
           } else {
             setIsVisualizing(false); // Reset if no path to animate
           }
         }, timeout * i);
+        animationTimeouts.current.push(timeoutId);
         return;
       }
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         const node = visitedNodesInOrder[i];
         setGrid(prev => {
           const newGrid = [...prev];
@@ -69,12 +76,13 @@ export function usePathfinder(grid, startNode, endNode, setGrid, showSnackbar) {
           return newGrid;
         });
       }, timeout * i);
+      animationTimeouts.current.push(timeoutId);
     }
   };
 
   const animateShortestPath = (nodesInShortestPath) => {
     for (let i = 0; i < nodesInShortestPath.length; i++) {
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         const node = nodesInShortestPath[i];
         setGrid(prev => {
           const newGrid = [...prev];
@@ -88,41 +96,39 @@ export function usePathfinder(grid, startNode, endNode, setGrid, showSnackbar) {
         });
         if (i === nodesInShortestPath.length - 1) setIsVisualizing(false);
       }, 50 * i);
+      animationTimeouts.current.push(timeoutId);
     }
   };
 
   const visualizeAlgorithm = () => {
     if (isVisualizing) return;
 
-    setGrid(prev => {
-      const clearedGrid = clearVisualization(prev);
-      const currentStartNode = clearedGrid[startNode.row][startNode.col];
-      const currentEndNode = clearedGrid[endNode.row][endNode.col];
+    clearVisualization(grid);
 
-      currentStartNode.distance = 0;
+    // Use the current grid state with the start/end nodes
+    const currentStartNode = grid[startNode.row][startNode.col];
+    const currentEndNode = grid[endNode.row][endNode.col];
+    currentStartNode.distance = 0;
 
-      const visitedNodesInOrder = algorithm === 'dijkstra'
-        ? dijkstra(clearedGrid, currentStartNode, currentEndNode)
-        : astar(clearedGrid, currentStartNode, currentEndNode);
+    const visitedNodesInOrder = algorithm === 'dijkstra'
+      ? dijkstra(grid, currentStartNode, currentEndNode)
+      : astar(grid, currentStartNode, currentEndNode);
 
-      const shortestPath = getNodesInShortestPath(currentEndNode);
+    const shortestPath = getNodesInShortestPath(currentEndNode);
 
-      if (!currentEndNode.previousNode) {
-        animateVisitedNodes(visitedNodesInOrder, []);
-        showSnackbar('No path found! Try removing some obstacles.', 'warning');
-      } else {
-        animateVisitedNodes(visitedNodesInOrder, shortestPath);
-        // showSnackbar('Path found!', 'success');
-      }
-
-      return clearedGrid;
-    });
+    if (!currentEndNode.previousNode) {
+      animateVisitedNodes(visitedNodesInOrder, []);
+      showSnackbar('No path found! Try removing some obstacles.', 'warning');
+    } else {
+      animateVisitedNodes(visitedNodesInOrder, shortestPath);
+    }
   };
 
   return {
     visualizeAlgorithm,
     isVisualizing,
     setAlgorithm,
-    algorithm
+    algorithm,
+    clearVisualization
   };
 }

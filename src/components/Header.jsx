@@ -2,7 +2,6 @@
 import { Button, Divider, Slider, Stack, Switch, ToggleButtonGroup, Tooltip, Typography } from "@mui/joy";
 import { FaBorderAll, FaEraser, FaPencilAlt } from "react-icons/fa";
 import { SLIDER_MARKS } from "../constants/config";
-import { usePathfinder } from "../hooks/usePathfinder";
 import { NODE_TYPES } from "../Node";
 
 export default function Header({
@@ -12,18 +11,12 @@ export default function Header({
   setGrid,
   setIsErasing,
   resizeGrid,
-  grid,
-  startNode,
-  endNode,
-  showSnackbar,
+  isVisualizing,
+  visualizeAlgorithm,
+  setAlgorithm,
+  algorithm,
 }) {
-  const { visualizeAlgorithm, isVisualizing, setAlgorithm, algorithm } = usePathfinder(
-    grid,
-    startNode,
-    endNode,
-    setGrid,
-    showSnackbar
-  );
+  // Remove usePathfinder hook since we're now receiving props
 
   function handleGridResize(newSize) {
     setGridSize(newSize);

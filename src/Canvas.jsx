@@ -11,7 +11,7 @@ const colors = {
   path: "#4e7bb6",
 };
 
-export default function Canvas({ gridSize, isErasing, sideLength, grid, setGrid, setStartNode, setEndNode }) {
+export default function Canvas({ gridSize, isErasing, sideLength, grid, setGrid, setStartNode, setEndNode, clearVisualization }) {
   const cellSize = sideLength / gridSize;
   const canvasRef = useRef(null);
   const [isDraggingStartNode, setIsDraggingStartNode] = useState(false);
@@ -180,12 +180,15 @@ export default function Canvas({ gridSize, isErasing, sideLength, grid, setGrid,
     const col = Math.floor(e.offsetX / cellSize);
     const node = grid[row][col];
 
-    if (node.type === "start") {
-      setIsDraggingStartNode(true);
-      setStartNode(new Node(row, col, "start"));
-    } else if (node.type === "end") {
-      setIsDraggingEndNode(true);
-      setEndNode(new Node(row, col, "end"));
+    if (node.type === "start" || node.type === "end") {
+      clearVisualization(grid); // No longer need to handle return value
+      if (node.type === "start") {
+        setIsDraggingStartNode(true);
+        setStartNode(new Node(row, col, "start"));
+      } else {
+        setIsDraggingEndNode(true);
+        setEndNode(new Node(row, col, "end"));
+      }
     } else {
       drawNode(row, col);
     }
