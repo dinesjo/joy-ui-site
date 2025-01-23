@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { NODE_TYPES } from '../Node';
 import { useAStar } from './algorithms/useAStar';
 import { useDijkstra } from './algorithms/useDijkstra';
@@ -10,13 +10,14 @@ export function usePathfinder(grid, startNode, endNode, setGrid, showSnackbar) {
   const { astar } = useAStar();
   const { dijkstra } = useDijkstra();
 
-  const clearVisualization = (grid) => {
-    // Clear all pending animations
+  const clearVisualization = useCallback((grid) => {
+    // Stop any ongoing animations
     animationTimeouts.current.forEach(timeout => clearTimeout(timeout));
     animationTimeouts.current = [];
     setIsVisualizing(false);
 
-    setGrid(grid.map(row =>
+    // Clear the grid immediately without waiting for state update
+    const clearedGrid = grid.map(row =>
       row.map(node => ({
         ...node,
         distance: Infinity,
@@ -27,8 +28,11 @@ export function usePathfinder(grid, startNode, endNode, setGrid, showSnackbar) {
           ? node.type
           : NODE_TYPES.EMPTY
       }))
-    ));
-  };
+    );
+
+    setGrid(clearedGrid);
+    return clearedGrid; // Return cleared grid for immediate use
+  }, [setGrid]);
 
   const getNodesInShortestPath = (finishNode) => {
     const nodesInShortestPath = [];
@@ -102,17 +106,16 @@ export function usePathfinder(grid, startNode, endNode, setGrid, showSnackbar) {
 
   const visualizeAlgorithm = () => {
     if (isVisualizing) return;
-
-    clearVisualization(grid);
-
-    // Use the current grid state with the start/end nodes
-    const currentStartNode = grid[startNode.row][startNode.col];
-    const currentEndNode = grid[endNode.row][endNode.col];
+    
+    const clearedGrid = clearVisualization(grid);
+    // Continue with the cleared grid directly instead of waiting for state update
+    const currentStartNode = clearedGrid[startNode.row][startNode.col];
+    const currentEndNode = clearedGrid[endNode.row][endNode.col];
     currentStartNode.distance = 0;
 
     const visitedNodesInOrder = algorithm === 'dijkstra'
-      ? dijkstra(grid, currentStartNode, currentEndNode)
-      : astar(grid, currentStartNode, currentEndNode);
+      ? dijkstra(clearedGrid, currentStartNode, currentEndNode)
+      : astar(clearedGrid, currentStartNode, currentEndNode);
 
     const shortestPath = getNodesInShortestPath(currentEndNode);
 

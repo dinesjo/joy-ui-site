@@ -181,7 +181,9 @@ export default function Canvas({ gridSize, isErasing, sideLength, grid, setGrid,
     const node = grid[row][col];
 
     if (node.type === "start" || node.type === "end") {
-      clearVisualization(grid); // No longer need to handle return value
+      const clearedGrid = clearVisualization(grid);
+      setGrid(clearedGrid); // Ensure grid is updated immediately
+      
       if (node.type === "start") {
         setIsDraggingStartNode(true);
         setStartNode(new Node(row, col, "start"));
