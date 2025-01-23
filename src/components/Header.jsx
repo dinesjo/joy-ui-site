@@ -1,9 +1,9 @@
 /* eslint-disable react/prop-types */
-import { Stack, Divider, Box, Typography, Slider, Tooltip, Switch, Button, ToggleButtonGroup } from "@mui/joy";
+import { Button, Divider, Slider, Stack, Switch, ToggleButtonGroup, Tooltip, Typography } from "@mui/joy";
 import { FaBorderAll, FaEraser, FaPencilAlt } from "react-icons/fa";
 import { SLIDER_MARKS } from "../constants/config";
-import { NODE_TYPES } from "../Node";
 import { usePathfinder } from "../hooks/usePathfinder";
+import { NODE_TYPES } from "../Node";
 
 export default function Header({
   gridSize,
@@ -32,17 +32,24 @@ export default function Header({
 
   return (
     <Stack
-      direction="row"
+      direction={{ xs: "column", md: "row" }}
       justifyContent="center"
-      alignItems="center"
-      spacing={6}
-      sx={{ width: "100vw", px: 2, py: 2.5 }}
+      alignItems={{ xs: "stretch", md: "center" }}
+      spacing={{ xs: 2, md: 6 }}
+      sx={{
+        width: "100%",
+        px: { xs: 1, md: 2 },
+        py: 2.5,
+        maxWidth: "1200px",
+        mx: "auto",
+      }}
     >
-      <Box sx={{ width: 250 }}>
+      <Stack sx={{ width: { xs: "100%", md: 200 } }} justifyContent="center" alignItems="center">
         <Typography startDecorator={<FaBorderAll />}>
-          Grid Size [{gridSize}x{gridSize}]
+          Grid Size [{gridSize}&times;{gridSize}]
         </Typography>
         <Slider
+          sx={{ maxWidth: 300 }}
           valueLabelDisplay="auto"
           defaultValue={20}
           value={gridSize}
@@ -52,9 +59,15 @@ export default function Header({
           marks={SLIDER_MARKS}
           onChange={(_, newSize) => handleGridResize(newSize)}
         />
-      </Box>
-      <Divider orientation="vertical" />
-      <Stack direction="column" justifyContent="center" alignItems="center" spacing={2}>
+      </Stack>
+      <Divider orientation={{ xs: "horizontal", md: "vertical" }} />
+      <Stack
+        direction={{ xs: "row", md: "column" }}
+        justifyContent="center"
+        alignItems="center"
+        spacing={{ xs: 2, md: 2 }}
+        sx={{ width: { xs: "100%", md: "auto" } }}
+      >
         <Tooltip title="Tip: Hold Shift to erase quickly">
           <Switch
             variant="solid"
@@ -84,8 +97,8 @@ export default function Header({
           Clear All Obstacles
         </Button>
       </Stack>
-      <Divider orientation="vertical" />
-      <Stack direction="column" gap={1}>
+      <Divider orientation={{ xs: "horizontal", md: "vertical" }} />
+      <Stack direction="column" gap={1} sx={{ width: { xs: "100%", md: "auto" } }} alignItems="center">
         <ToggleButtonGroup
           value={algorithm}
           onChange={(_, value) => value && setAlgorithm(value)}
