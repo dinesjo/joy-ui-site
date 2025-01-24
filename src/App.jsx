@@ -1,6 +1,6 @@
 import { Sheet, Snackbar, Card } from "@mui/joy";
 import { useEffect, useState } from "react";
-import Canvas from "./Canvas";
+import Canvas from "./components/Canvas";
 import Header from "./components/Header";
 import { useGrid } from "./hooks/useGrid";
 import useEraser from "./hooks/useEraser";
@@ -10,7 +10,7 @@ import { usePathfinder } from "./hooks/usePathfinder";
 export default function App() {
   // Grid size state
   const [gridSize, setGridSize] = useState(parseInt(localStorage.getItem("gridSize")) || 30);
-  const { grid, setGrid, startNode, setStartNode, endNode, setEndNode, resizeGrid } = useGrid(gridSize);
+  const { grid, setGrid, startNode, setStartNode, endNode, setEndNode, clearGrid, resizeGrid } = useGrid(gridSize);
 
   // Eraser state
   const { isErasing, setIsErasing } = useEraser();
@@ -38,16 +38,12 @@ export default function App() {
         setGridSize={setGridSize}
         isErasing={isErasing}
         setIsErasing={setIsErasing}
-        setGrid={setGrid}
         resizeGrid={resizeGrid}
-        grid={grid}
-        startNode={startNode}
-        endNode={endNode}
-        showSnackbar={showSnackbar}
         isVisualizing={isVisualizing}
         visualizeAlgorithm={visualizeAlgorithm}
         setAlgorithm={setAlgorithm}
         algorithm={algorithm}
+        clearGrid={clearGrid}
       />
       <Sheet
         sx={{

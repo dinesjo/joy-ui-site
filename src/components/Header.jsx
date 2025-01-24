@@ -2,19 +2,18 @@
 import { Button, Divider, Slider, Stack, Switch, ToggleButtonGroup, Tooltip, Typography } from "@mui/joy";
 import { FaBorderAll, FaEraser, FaPencilAlt } from "react-icons/fa";
 import { SLIDER_MARKS } from "../constants/config";
-import { NODE_TYPES } from "../Node";
 
 export default function Header({
   gridSize,
   setGridSize,
   isErasing,
-  setGrid,
   setIsErasing,
   resizeGrid,
   isVisualizing,
   visualizeAlgorithm,
   setAlgorithm,
   algorithm,
+  clearGrid,
 }) {
   // Remove usePathfinder hook since we're now receiving props
 
@@ -53,7 +52,8 @@ export default function Header({
           onChange={(_, newSize) => handleGridResize(newSize)}
         />
       </Stack>
-      <Divider orientation={{ xs: "horizontal", md: "vertical" }} />
+      <Divider orientation="vertical" sx={{ display: { xs: "none", md: "block" } }} />
+      <Divider orientation="horizontal" sx={{ display: { xs: "block", md: "none" } }} />
       <Stack
         direction={{ xs: "row", md: "column" }}
         justifyContent="center"
@@ -70,27 +70,12 @@ export default function Header({
             checked={isErasing}
           />
         </Tooltip>
-        <Button
-          variant="plain"
-          color="danger"
-          onClick={() =>
-            setGrid((prevGrid) => {
-              const newGrid = [...prevGrid];
-              newGrid.forEach((row) => {
-                row.forEach((node) => {
-                  if (node.type === NODE_TYPES.OBSTACLE) {
-                    node.type = "empty";
-                  }
-                });
-              });
-              return newGrid;
-            })
-          }
-        >
+        <Button variant="plain" color="danger" onClick={clearGrid}>
           Clear All Obstacles
         </Button>
       </Stack>
-      <Divider orientation={{ xs: "horizontal", md: "vertical" }} />
+      <Divider orientation="vertical" sx={{ display: { xs: "none", md: "block" } }} />
+      <Divider orientation="horizontal" sx={{ display: { xs: "block", md: "none" } }} />
       <Stack direction="column" gap={1} sx={{ width: { xs: "100%", md: "auto" } }} alignItems="center">
         <ToggleButtonGroup
           value={algorithm}

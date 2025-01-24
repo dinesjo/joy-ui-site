@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Node } from "../Node";
+import { Node, NODE_TYPES } from "../Node";
 import { END_NODE, START_NODE } from "../constants/config";
 
 export function useGrid(gridSize) {
@@ -101,7 +101,7 @@ export function useGrid(gridSize) {
       const newGrid = [...prevGrid];
       newGrid.forEach((row) => {
         row.forEach((node) => {
-          if (node.type !== "start" && node.type !== "end") {
+          if ([NODE_TYPES.OBSTACLE, NODE_TYPES.CONSIDERED, NODE_TYPES.PATH].includes(node.type)) {
             node.type = "empty";
           }
         });

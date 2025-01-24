@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useEffect, useState, useRef } from "react";
-import { Node, NODE_TYPES } from "./Node";
+import { Node, NODE_TYPES } from "../Node";
 
 const colors = {
   obstacle: "#222",
